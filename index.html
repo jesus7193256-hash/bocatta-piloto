@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bōcatta Food Spot | Menú Digital y Reservaciones - Chilapa, Gro.</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Playfair Display (for the Bōcatta serif aesthetic) & Plus Jakarta Sans (clean UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bocatta: {
+              red: '#C83E31',
+              redDark: '#A62E22',
+              wine: '#581818',
+              wineDark: '#3A0E0E',
+              cream: '#F7EFEA',
+              creamLight: '#FCF9F6',
+              sand: '#EAD8CE',
+              gold: '#D97724',
+              matcha: '#5A7247'
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F7EFEA;
+      color: #3A0E0E;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Custom Scrollbar for horizontal category bar */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Scalloped stamp badge inspired by Bōcatta's Instagram sticker */
+    .stamp-badge {
+      background: radial-gradient(circle, #F7EFEA 68%, transparent 70%);
+      box-shadow: 0 10px 25px -5px rgba(88, 24, 24, 0.35);
+    }
+    /* Dotted leader line like the physical menu */
+    .dotted-leader {
+      background-image: radial-gradient(circle, #C83E31 1px, transparent 1px);
+      background-position: bottom;
+      background-size: 6px 2px;
+      background-repeat: repeat-x;
+    }
+    @keyframes pulse-Subtle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    .animate-cart-bounce {
+      animation: pulse-Subtle 0.35s ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-bocatta-red selection:text-white">
+
+  <!-- TOP PILOT SIMULATION BAR (For testing & client demo) -->
+  <div class="bg-bocatta-wineDark text-bocatta-cream text-xs py-2 px-4 border-b border-bocatta-wine/60">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-bocatta-red text-white">
+          <i class="fa-solid fa-bolt mr-1"></i> PILOTO MVP
+        </span>
+        <span class="opacity-90 hidden sm:inline">Demostración interactiva de eficiencia operativa para <strong>@bocatta.ch</strong></span>
+      </div>
+      <div class="flex items-center gap-3 ml-auto">
+        <label for="sim-status-select" class="text-[11px] opacity-80">Estado del local:</label>
+        <select id="sim-status-select" onchange="updateStoreStatus()" class="bg-bocatta-wine text-bocatta-cream border border-bocatta-sand/30 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-bocatta-red cursor-pointer">
+          <option value="auto">Automático (Hora real)</option>
+          <option value="open">Simular: Abierto ahora</option>
+          <option value="closed">Simular: Cerrado</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY NAVIGATION HEADER -->
+  <header class="sticky top-0 z-30 bg-bocatta-cream/95 backdrop-blur-md border-b border-bocatta-sand shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-full bg-bocatta-wine text-bocatta-cream flex flex-col items-center justify-center border-2 border-bocatta-red shadow-sm group-hover:scale-105 transition">
+          <span class="font-serif font-extrabold text-lg leading-none text-bocatta-red">B</span>
+          <span class="text-[7px] tracking-widest uppercase text-bocatta-sand mt-0.5">20.26</span>
+        </div>
+        <div>
+          <span class="font-serif text-2xl sm:text-3xl font-extrabold tracking-tight text-bocatta-red leading-none block">Bōcatta</span>
+          <span class="text-[10px] tracking-[0.22em] uppercase font-semibold text-bocatta-wine block mt-0.5">FOOD SPOT · CHILAPA</span>
+        </div>
+      </a>
+
+      <!-- Quick Navigation Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-bocatta-wine">
+        <a href="#menu-section" class="hover:text-bocatta-red transition flex items-center gap-1.5">
+          <i class="fa-solid fa-utensils text-bocatta-red text-xs"></i> Menú Digital
+        </a>
+        <button type="button" onclick="openCharolaBuilder()" class="hover:text-bocatta-red transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-layer-group text-bocatta-red text-xs"></i> Charola 5 Rollos (-10%)
+        </button>
+        <a href="#reservas-section" class="hover:text-bocatta-red transition flex items-center gap-1.5">
+          <i class="fa-regular fa-calendar-check text-bocatta-red text-xs"></i> Reservaciones
+        </a>
+        <a href="#ubicacion-section" class="hover:text-bocatta-red transition flex items-center gap-1.5">
+          <i class="fa-solid fa-location-dot text-bocatta-red text-xs"></i> Ubicación
+        </a>
+      </nav>
+
+      <!-- Cart Trigger Button -->
+      <div class="flex items-center gap-2">
+        <button 
+          id="header-cart-btn"
+          type="button"
+          onclick="toggleCartDrawer(true)" 
+          class="relative inline-flex items-center gap-2.5 bg-bocatta-wine hover:bg-bocatta-wineDark text-bocatta-cream px-4 py-2.5 rounded-full text-xs sm:text-sm font-semibold shadow-md transition cursor-pointer"
+        >
+          <i class="fa-solid fa-bag-shopping text-bocatta-red"></i>
+          <span>Pedido</span>
+          <span id="header-cart-count" class="px-2 py-0.5 text-xs rounded-full bg-bocatta-red text-white font-bold">0</span>
+          <span id="header-cart-total" class="hidden sm:inline font-serif text-bocatta-sand border-l border-bocatta-sand/30 pl-2">$0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER SECTION -->
+  <section class="relative bg-bocatta-red text-bocatta-cream overflow-hidden border-b-4 border-bocatta-wine">
+    <!-- Subtle decorative background circles -->
+    <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-bocatta-wine/20 pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-bocatta-wine/15 pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto px-4 py-8 sm:py-12 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left Column: Brand Messaging & Status -->
+        <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+          <!-- Dynamic Open/Closed Pill -->
+          <div id="store-status-badge" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-bocatta-wine/90 text-bocatta-cream text-xs sm:text-sm font-medium shadow-sm border border-white/15">
+            <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="status-text">Verificando horario...</span>
+          </div>
+
+          <div class="space-y-2">
+            <p class="uppercase tracking-[0.25em] text-xs sm:text-sm font-semibold text-bocatta-sand">ESTD. 20.26 · CHILAPA DE ÁLVAREZ, GRO.</p>
+            <h1 class="font-serif text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-bocatta-cream">
+              Sushi, Alitas, Café de Especialidad &amp; Drinks
+            </h1>
+          </div>
+
+          <p class="text-bocatta-cream/90 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            Explora nuestro menú interactivo sin hacer zoom en imágenes. Personaliza tus rollos, elige las salsas de tus boneless o agenda tu mesa y envía tu pedido listo en segundos por WhatsApp.
+          </p>
+
+          <!-- Primary CTA Buttons -->
+          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
+            <button type="button" onclick="scrollToSection('menu-section')" class="inline-flex items-center gap-2 bg-bocatta-cream text-bocatta-wine hover:bg-white font-bold px-5 py-3.5 rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 text-sm cursor-pointer">
+              <i class="fa-solid fa-book-open text-bocatta-red"></i>
+              Ordenar Ahora
+            </button>
+            <button type="button" onclick="openCharolaBuilder()" class="inline-flex items-center gap-2 bg-bocatta-wineDark hover:bg-black text-bocatta-cream font-bold px-5 py-3.5 rounded-2xl shadow-lg border border-bocatta-sand/30 transition text-sm cursor-pointer">
+              <i class="fa-solid fa-layer-group text-bocatta-red"></i>
+              Armar Charola (-10%)
+            </button>
+            <button type="button" onclick="scrollToSection('reservas-section')" class="inline-flex items-center gap-2 bg-bocatta-wine hover:bg-bocatta-wineDark text-bocatta-cream font-semibold px-5 py-3.5 rounded-2xl shadow-md border border-bocatta-cream/20 transition text-sm cursor-pointer">
+              <i class="fa-regular fa-calendar-check"></i>
+              Reservar Mesa
+            </button>
+          </div>
+
+          <!-- Quick Info Pills -->
+          <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs sm:text-sm text-bocatta-cream/90">
+            <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-bocatta-sand"></i> Mar - Dom: 5:30 PM a 10:00 PM</span>
+            <span class="hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-motorcycle text-bocatta-sand"></i> Servicio a domicilio y Pick-up</span>
+            <span class="hidden sm:inline">•</span>
+            <span class="flex items-center gap-1.5"><i class="fa-brands fa-whatsapp text-bocatta-sand"></i> 756 115 9334</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Featured Visual Card & Promo -->
+        <div class="lg:col-span-5">
+          <div class="bg-bocatta-wine rounded-3xl p-5 sm:p-6 shadow-2xl border-2 border-bocatta-sand/20 relative">
+            <!-- Stamp Sticker inspired by Bōcatta Instagram -->
+            <div class="-top-5 -right-3 sm:-right-5 absolute w-24 h-24 rounded-full bg-bocatta-cream text-bocatta-red flex flex-col items-center justify-center rotate-12 shadow-xl border-4 border-dashed border-bocatta-red">
+              <span class="text-[8px] font-bold tracking-widest text-bocatta-wine">ESTD.20.26</span>
+              <span class="font-serif font-extrabold text-3xl leading-none">B</span>
+              <span class="text-[8px] font-bold tracking-widest text-bocatta-wine">FOOD SPOT</span>
+            </div>
+
+            <div class="space-y-4">
+              <div class="inline-flex items-center gap-1.5 bg-bocatta-red/30 border border-bocatta-red text-bocatta-sand text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                🔥 Promoción Especial para Compartir
+              </div>
+              <h2 class="font-serif text-2xl sm:text-3xl font-bold text-bocatta-cream leading-tight">
+                Charola de 5 Rollos Surtidos
+              </h2>
+              <p class="text-xs sm:text-sm text-bocatta-sand/90 leading-relaxed">
+                Elige tus 5 rollos favoritos de nuestra barra (Especiales o Empanizados) y obtén automáticamente un <strong>10% de descuento sobre el total</strong> de tu charola.
+              </p>
+
+              <!-- Visual Sushi Showcase (Como en el primer piloto) -->
+              <div class="grid grid-cols-3 gap-2.5 pt-1">
+                <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
+                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xs font-bold text-bocatta-cream">Monkey Roll</div>
+                  <div class="text-[10px] text-bocatta-sand">Plátano &amp; Anguila</div>
+                </div>
+                <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
+                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xs font-bold text-bocatta-cream">Avocado Roll</div>
+                  <div class="text-[10px] text-bocatta-sand">Camarón Emp.</div>
+                </div>
+                <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
+                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xs font-bold text-bocatta-cream">Spicy Mexican</div>
+                  <div class="text-[10px] text-bocatta-sand">Arrachera &amp; Tocino</div>
+                </div>
+              </div>
+
+              <button onclick="openCharolaBuilder()" class="w-full bg-bocatta-red hover:bg-bocatta-redDark text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                Armar mi Charola de 5 Rollos (-10%)
+              </button>
+              <p class="text-[11px] text-center text-bocatta-sand/70 italic">
+                *10% de descuento directo sobre el total de los 5 rollos (no aplica con otras promociones).
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN DIGITAL MENU SECTION -->
+  <main id="menu-section" class="max-w-6xl mx-auto px-4 py-10 flex-1 w-full">
+    
+    <!-- Section Title & Search Bar -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-bocatta-red">Carta Oficial Interactiva</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-extrabold text-bocatta-wine">Nuestro Menú</h2>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative w-full md:w-80">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-bocatta-wine/50 text-sm"></i>
+        <input 
+          type="text" 
+          id="menu-search" 
+          oninput="handleSearch(this.value)"
+          placeholder="Buscar rollo, matcha, boneless, camarón..." 
+          class="w-full pl-10 pr-9 py-2.5 bg-white border-2 border-bocatta-sand rounded-2xl text-sm text-bocatta-wine placeholder-bocatta-wine/40 focus:outline-none focus:border-bocatta-red shadow-sm transition"
+        />
+        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-bocatta-wine/50 hover:text-bocatta-red">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Pills Navigation (Sticky horizontal scroll on mobile) -->
+    <div class="sticky top-[68px] z-20 bg-bocatta-cream/95 backdrop-blur-sm py-3 -mx-4 px-4 mb-6 border-b border-bocatta-sand">
+      <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </div>
+
+    <!-- Matcha & Coffee Extras Spotlight Banner (Shown on Cafetería / Matcha tab) -->
+    <div id="coffee-extras-banner" class="hidden mb-6 bg-bocatta-wine text-bocatta-cream rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md border border-bocatta-red/40">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-bocatta-red/20 border border-bocatta-red flex items-center justify-center text-2xl shrink-0">
+          🍵
+        </div>
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-bocatta-sand">What's Matcha? · Té Verde Japonés Grado Ceremonial</span>
+          <h3 class="font-serif font-bold text-lg">Dale un toque diferente a tu bebida fría o frappé</h3>
+          <p class="text-xs text-bocatta-sand/90">Al elegir tu bebida puedes agregar: <strong>Cold foam (+$5)</strong>, <strong>Perlas explosivas (+$10)</strong> o <strong>Escarchado (+$10)</strong>.</p>
+        </div>
+      </div>
+      <span class="text-xs bg-bocatta-red text-white px-3 py-1.5 rounded-full font-semibold shrink-0">
+        More Espresso, Less Depresso 
+      </span>
+    </div>
+
+    <!-- Menu Grid Container -->
+    <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Populated dynamically via JS -->
+    </div>
+
+    <!-- Empty Search State -->
+    <div id="empty-search-state" class="hidden text-center py-14 bg-bocatta-creamLight rounded-3xl border-2 border-dashed border-bocatta-sand my-4">
+      <div class="text-4xl mb-3"></div>
+      <h3 class="font-serif text-xl font-bold text-bocatta-wine mb-1">No encontramos platillos con esa búsqueda</h3>
+      <p class="text-sm text-bocatta-wine/70 mb-4">Intenta buscar otro ingrediente como "camarón", "mango", "matcha" o "alitas".</p>
+      <button onclick="clearSearch()" class="bg-bocatta-red text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-bocatta-redDark transition">
+        Ver todo el menú
+      </button>
+    </div>
+
+  </main>
+
+  <!-- RESERVATION & EXPERIENCES SECTION -->
+  <section id="reservas-section" class="bg-bocatta-wine text-bocatta-cream py-12 border-t-4 border-bocatta-red">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Info Column: Experiences inspired by Instagram Highlights -->
+        <div class="lg:col-span-5 space-y-5">
+          <span class="inline-block bg-bocatta-red text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+            Reservaciones Sin Espera
+          </span>
+          <h2 class="font-serif text-3xl sm:text-4xl font-extrabold leading-tight">
+            Reserva tu Mesa o Celebra en Bōcatta
+          </h2>
+          <p class="text-bocatta-sand text-sm leading-relaxed">
+            Asegura tu lugar de <strong>Martes a Domingo (5:30 PM a 10:00 PM)</strong>. Ya sea para cenar con amigos, festejar un cumpleaños o vivir nuestras tardes de pintura.
+          </p>
+
+          <!-- Experience Highlights Cards (Con emojis como en el primer piloto) -->
+          <div class="space-y-3 pt-2">
+            <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
+                
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-bocatta-cream">Día Creativo / Paintings</h3>
+                <p class="text-xs text-bocatta-sand/80 mt-0.5">Reserva tu experiencia de pintura acompañada de tus rollos y bebidas favoritas. Ideal para parejas o grupos de amigos.</p>
+              </div>
+            </div>
+
+            <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
+                
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-bocatta-cream">Cumpleaños &amp; Festejos</h3>
+                <p class="text-xs text-bocatta-sand/80 mt-0.5">Preparamos tu mesa para tu celebración. Indícanos cuántas personas asisten y si deseas agregar postre.</p>
+              </div>
+            </div>
+
+            <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
+                
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-bocatta-cream">Cita Especial / Ustedes 2.0</h3>
+                <p class="text-xs text-bocatta-sand/80 mt-0.5">Mesa especial para dos acompañada de nuestra selección de vinos, coctelería o café de especialidad.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Form Column -->
+        <div class="lg:col-span-7 bg-bocatta-creamLight text-bocatta-wine rounded-3xl p-6 sm:p-8 shadow-2xl border-2 border-bocatta-sand">
+          <div class="flex items-center justify-between border-b border-bocatta-sand pb-4 mb-5">
+            <div>
+              <h3 class="font-serif text-2xl font-bold text-bocatta-wine">Solicitud de Reservación</h3>
+              <p class="text-xs text-bocatta-wine/70">Confirmación inmediata vía WhatsApp directo a Bōcatta</p>
+            </div>
+            <i class="fa-brands fa-whatsapp text-3xl text-emerald-600"></i>
+          </div>
+
+          <form id="reservation-form" onsubmit="handleReservationSubmit(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Tu Nombre Completo *</label>
+                <input type="text" id="res-name" required placeholder="Ej. Valeria Morales" oninput="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Teléfono / WhatsApp *</label>
+                <input type="tel" id="res-phone" required placeholder="Ej. 756 100 0000" oninput="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Fecha *</label>
+                <input type="date" id="res-date" required onchange="validateReservationDate(); updateReservationPreview();" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red" />
+                <p id="monday-warning" class="hidden text-[11px] text-bocatta-red font-semibold mt-1">
+                   Los lunes permanecemos cerrados.
+                </p>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Hora (5:30 - 9:30 PM) *</label>
+                <select id="res-time" required onchange="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red">
+                  <option value="5:30 PM">5:30 PM (Apertura)</option>
+                  <option value="6:00 PM">6:00 PM</option>
+                  <option value="6:30 PM">6:30 PM</option>
+                  <option value="7:00 PM">7:00 PM</option>
+                  <option value="7:30 PM" selected>7:30 PM</option>
+                  <option value="8:00 PM">8:00 PM</option>
+                  <option value="8:30 PM">8:30 PM</option>
+                  <option value="9:00 PM">9:00 PM</option>
+                  <option value="9:30 PM">9:30 PM (Última reserva)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">N° de Personas *</label>
+                <select id="res-guests" required onchange="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red">
+                  <option value="2 personas">2 personas (Pareja)</option>
+                  <option value="3 personas">3 personas</option>
+                  <option value="4 personas" selected>4 personas</option>
+                  <option value="5 personas">5 personas</option>
+                  <option value="6 personas">6 personas</option>
+                  <option value="7 a 10 personas (Grupo)">7 a 10 personas (Grupo)</option>
+                  <option value="Más de 10 personas (Evento)">Más de 10 personas (Evento)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Ocasión / Experiencia</label>
+                <select id="res-occasion" onchange="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red">
+                  <option value="Cena casual">Cena casual</option>
+                  <option value="Cumpleaños ">Cumpleaños </option>
+                  <option value="Día Creativo / Paintings ">Día Creativo / Paintings </option>
+                  <option value="Cita Especial (Ustedes 2.0 )">Cita Especial (Ustedes 2.0 🥂)</option>
+                  <option value="Reunión grupal">Reunión grupal</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Notas o Petición Especial</label>
+                <input type="text" id="res-notes" placeholder="Ej. Mesa cerca de terraza, postre de cumple..." oninput="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red" />
+              </div>
+            </div>
+
+            <!-- Live Ticket Preview for Reservation -->
+            <div class="bg-bocatta-cream p-3.5 rounded-2xl border border-bocatta-sand text-xs space-y-1">
+              <div class="flex items-center justify-between text-bocatta-wine/70 font-semibold">
+                <span>Vista previa del mensaje a enviar:</span>
+                <span class="text-[11px] text-emerald-700"><i class="fa-solid fa-check-double"></i> Formato limpio</span>
+              </div>
+              <pre id="res-preview-box" class="whitespace-pre-wrap font-sans text-bocatta-wine leading-relaxed text-xs pt-1"></pre>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-1">
+              <button type="submit" class="flex-1 bg-bocatta-red hover:bg-bocatta-redDark text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                Confirmar Reservación por WhatsApp
+              </button>
+              <button type="button" onclick="copyReservationText()" class="bg-bocatta-sand/60 hover:bg-bocatta-sand text-bocatta-wine font-semibold py-3.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> Copiar Texto
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION & FOOTER SECTION -->
+  <footer id="ubicacion-section" class="bg-bocatta-wineDark text-bocatta-cream pt-12 pb-24 md:pb-12 border-t border-white/10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-white/10">
+        
+        <!-- Brand Column -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-bocatta-red flex items-center justify-center font-serif font-bold text-xl text-white">B</div>
+            <div>
+              <h3 class="font-serif text-2xl font-bold text-bocatta-cream leading-none">Bōcatta</h3>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-bocatta-sand mt-0.5">FOOD SPOT · ESTD. 20.26</p>
+            </div>
+          </div>
+          <p class="text-xs text-bocatta-sand/80 leading-relaxed">
+            El punto de encuentro en Chilapa para amantes del sushi, boneless, café de especialidad, matcha ceremonial y coctelería de autor.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://www.instagram.com/bocatta.ch" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-bocatta-red px-3 py-1.5 rounded-full text-xs transition">
+              <i class="fa-brands fa-instagram"></i> @bocatta.ch
+            </a>
+            <a href="https://wa.me/527561159334" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600 px-3 py-1.5 rounded-full text-xs transition">
+              <i class="fa-brands fa-whatsapp"></i> 756 115 9334
+            </a>
+          </div>
+        </div>
+
+        <!-- Address & Schedule -->
+        <div class="space-y-2.5 text-xs">
+          <h4 class="font-serif text-base font-bold text-bocatta-red uppercase tracking-wider">Ubicación y Horario</h4>
+          <p class="flex items-start gap-2 text-bocatta-sand">
+            <i class="fa-solid fa-location-dot text-bocatta-red mt-1"></i>
+            <span><strong>Av. Insurgentes 400A</strong>, Esquina con Av. Revolución, Col. Centro, Chilapa de Álvarez, Guerrero.</span>
+          </p>
+          <p class="flex items-start gap-2 text-bocatta-sand">
+            <i class="fa-regular fa-clock text-bocatta-red mt-1"></i>
+            <span><strong>Martes a Domingo:</strong> 5:30 PM a 10:00 PM<br><span class="opacity-70">Lunes: Cerrado por descanso</span></span>
+          </p>
+          <p class="flex items-start gap-2 text-bocatta-sand">
+            <i class="fa-solid fa-phone text-bocatta-red mt-1"></i>
+            <span>Pedidos y Reservaciones: <strong>756 115 9334</strong></span>
+          </p>
+        </div>
+
+        <!-- Quick Directions Card -->
+        <div class="bg-bocatta-wine p-4 rounded-2xl border border-white/10 flex flex-col justify-between space-y-3">
+          <div>
+            <span class="text-[10px] uppercase tracking-widest text-bocatta-sand font-semibold">Referencia Rápida</span>
+            <h5 class="font-bold text-sm text-white mt-0.5">Centro de Chilapa, Gro.</h5>
+            <p class="text-xs text-bocatta-sand/80 mt-1">Esquina Av. Insurgentes 400A con Av. Revolución.</p>
+          </div>
+          <a 
+            href="https://www.google.com/maps/search/?api=1&query=Av.+Insurgentes+400A+Chilapa+Guerrero" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full bg-bocatta-cream text-bocatta-wine hover:bg-white font-bold py-2.5 px-4 rounded-xl text-xs text-center transition flex items-center justify-center gap-2"
+          >
+            <i class="fa-solid fa-map-location-dot text-bocatta-red"></i>
+            Abrir en Google Maps
+          </a>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-bocatta-sand/60 gap-2">
+        <p>© 2026 Bōcatta Food Spot. Todos los derechos reservados.</p>
+        <p>Prototipo Piloto v1.0 — Menú Digital &amp; Automatización de Pedidos por WhatsApp</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING BOTTOM CART BAR (MOBILE-FIRST) -->
+  <div id="floating-cart-bar" class="fixed bottom-4 inset-x-4 z-30 max-w-lg mx-auto hidden">
+    <button 
+      id="floatingCartBtn"
+      type="button"
+      onclick="toggleCartDrawer(true)" 
+      class="w-full bg-bocatta-wine hover:bg-bocatta-wineDark text-bocatta-cream p-4 rounded-2xl shadow-2xl border-2 border-bocatta-red flex items-center justify-between transition transform active:scale-95 cursor-pointer"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-bocatta-red text-white font-extrabold flex items-center justify-center text-sm" id="floating-cart-count">
+          0
+        </div>
+        <div class="text-left">
+          <div class="text-xs font-bold uppercase tracking-wider text-bocatta-sand">Ver mi pedido listo</div>
+          <div class="text-[11px] opacity-80">Haz clic para revisar y enviar por WhatsApp</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="font-serif font-extrabold text-lg text-white" id="floating-cart-total">$0</span>
+        <i class="fa-solid fa-chevron-right text-bocatta-red bg-bocatta-cream w-7 h-7 rounded-full flex items-center justify-center text-xs"></i>
+      </div>
+    </button>
+  </div>
+
+  <!-- ITEM CUSTOMIZATION MODAL (Variants, Sauces, Coffee Extras) -->
+  <div id="item-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-bocatta-cream w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-sand overflow-hidden max-h-[90vh] flex flex-col animate-fadeIn">
+      <!-- Modal Header -->
+      <div class="bg-bocatta-wine text-bocatta-cream p-5 flex items-start justify-between gap-4">
+        <div>
+          <span id="modal-item-category" class="text-[10px] font-bold uppercase tracking-widest text-bocatta-red bg-bocatta-cream px-2.5 py-0.5 rounded-full">Categoría</span>
+          <h3 id="modal-item-title" class="font-serif text-2xl font-bold mt-1.5">Nombre del Platillo</h3>
+          <p id="modal-item-desc" class="text-xs text-bocatta-sand/90 mt-1 leading-relaxed"></p>
+        </div>
+        <button onclick="closeItemModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Options) -->
+      <div class="p-5 overflow-y-auto space-y-5 flex-1">
+        <!-- Variant / Size / Flavor Selector -->
+        <div id="modal-variants-container" class="space-y-2">
+          <label id="modal-variants-label" class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine">
+            Elige una opción *
+          </label>
+          <div id="modal-variants-list" class="grid grid-cols-1 gap-2"></div>
+        </div>
+
+        <!-- Sauce / Secondary Required Selector (e.g., Alitas/Boneless or Bōcatta Ball protein) -->
+        <div id="modal-secondary-container" class="hidden space-y-2">
+          <label id="modal-secondary-label" class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine">
+            Elige tu salsa o proteína *
+          </label>
+          <div id="modal-secondary-list" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <!-- Optional Extras (For Coffee, Frappes, Matcha, Smoothies) -->
+        <div id="modal-extras-container" class="hidden space-y-2 pt-2 border-t border-bocatta-sand">
+          <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine">
+            Dale un toque diferente a tu bebida (Opcional)
+          </label>
+          <div id="modal-extras-list" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Customer Note for this item -->
+        <div class="pt-2 border-t border-bocatta-sand">
+          <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">
+            Nota de cocina (Opcional)
+          </label>
+          <input 
+            type="text" 
+            id="modal-item-note" 
+            placeholder="Ej. Sin pepino, salsa aparte, poca azúcar..." 
+            class="w-full px-3.5 py-2 rounded-xl bg-white border border-bocatta-sand text-xs text-bocatta-wine focus:outline-none focus:border-bocatta-red"
+          />
+        </div>
+      </div>
+
+      <!-- Modal Footer: Quantity & Add Button -->
+      <div class="p-4 bg-white border-t border-bocatta-sand flex items-center justify-between gap-4">
+        <div class="flex items-center border-2 border-bocatta-sand rounded-xl bg-bocatta-cream">
+          <button type="button" onclick="changeModalQty(-1)" class="w-10 h-10 text-bocatta-wine hover:text-bocatta-red font-bold text-lg">-</button>
+          <span id="modal-item-qty" class="w-8 text-center font-bold text-sm text-bocatta-wine">1</span>
+          <button type="button" onclick="changeModalQty(1)" class="w-10 h-10 text-bocatta-wine hover:text-bocatta-red font-bold text-lg">+</button>
+        </div>
+
+        <button 
+          type="button" 
+          onclick="confirmAddItemFromModal()" 
+          class="flex-1 bg-bocatta-red hover:bg-bocatta-redDark text-white font-bold py-3 px-5 rounded-xl shadow-md transition flex items-center justify-between text-sm"
+        >
+          <span>Agregar al Pedido</span>
+          <span id="modal-item-price" class="font-serif text-base">$0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5-ROLL PLATTER BUILDER MODAL (CHAROLA DE 5 ROLLOS SURTIDOS -10%) -->
+  <div id="charola-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-bocatta-cream w-full max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-red overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="bg-bocatta-red text-white p-5 flex items-start justify-between gap-4">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-widest bg-bocatta-wine text-bocatta-sand px-2.5 py-0.5 rounded-full">
+            PROMO ESPECIAL BŌCATTA (-10% DIRECTO)
+          </span>
+          <h3 class="font-serif text-2xl font-bold mt-1">Arma tu Charola de 5 Rollos</h3>
+          <p class="text-xs text-white/90 mt-0.5">Selecciona tus 5 rollos surtidos. El sistema suma el precio exacto de cada rollo y aplica automáticamente el <strong>10% de descuento</strong>.</p>
+        </div>
+        <button onclick="closeCharolaBuilder()" class="w-8 h-8 rounded-full bg-black/20 hover:bg-black/30 text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-3 flex-1" id="charola-selectors-container">
+        <!-- 5 Roll dropdown selectors dynamically rendered here -->
+      </div>
+
+      <div class="p-4 bg-white border-t border-bocatta-sand space-y-3">
+        <div class="flex items-center justify-between text-xs text-bocatta-wine/80">
+          <span>Suma normal de los 5 rollos: <strong id="charola-regular-sum" class="line-through">$600</strong></span>
+          <span class="text-emerald-700 font-bold bg-emerald-100 px-2.5 py-0.5 rounded-full">Ahorras 10%: -<span id="charola-discount-amount">$60</span></span>
+        </div>
+        <button 
+          type="button" 
+          onclick="addCharolaToCart()" 
+          class="w-full bg-bocatta-wine hover:bg-bocatta-wineDark text-white font-bold py-3.5 px-5 rounded-xl shadow-lg transition flex items-center justify-between text-sm"
+        >
+          <span><i class="fa-solid fa-plus-circle text-bocatta-red mr-1.5"></i> Agregar Charola de 5 Rollos al Pedido</span>
+          <span id="charola-final-price" class="font-serif text-lg text-bocatta-sand">$540</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE-OVER CART DRAWER & WHATSAPP TICKET GENERATOR -->
+  <div id="cart-drawer" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div onclick="toggleCartDrawer(false)" class="absolute inset-0 bg-black/60 backdrop-blur-xs"></div>
+
+    <!-- Drawer Panel -->
+    <div class="absolute inset-y-0 right-0 w-full max-w-md bg-bocatta-cream shadow-2xl border-l-2 border-bocatta-sand flex flex-col">
+      <!-- Drawer Header -->
+      <div class="bg-bocatta-wine text-bocatta-cream p-5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-bag-shopping text-bocatta-red text-xl"></i>
+          <div>
+            <h3 class="font-serif text-xl font-bold leading-none">Tu Pedido en Bōcatta</h3>
+            <p class="text-[11px] text-bocatta-sand mt-1">Generador de comanda rápida para WhatsApp</p>
+          </div>
+        </div>
+        <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Cart Items + Delivery Info -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-6">
+        
+        <!-- Cart Items List -->
+        <div id="cart-items-list" class="space-y-3">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Empty Cart Notice -->
+        <div id="cart-empty-state" class="text-center py-10 space-y-3">
+          <div class="w-16 h-16 rounded-full bg-bocatta-sand/50 text-bocatta-wine mx-auto flex items-center justify-center text-2xl">
+            🍱
+          </div>
+          <h4 class="font-serif text-lg font-bold text-bocatta-wine">Tu carrito está vacío</h4>
+          <p class="text-xs text-bocatta-wine/70 max-w-xs mx-auto">Agrega tus rollos, entradas, boneless o bebidas desde el menú digital para generar tu pedido.</p>
+        </div>
+
+        <!-- Order Checkout Details (Hidden when empty) -->
+        <div id="cart-checkout-form" class="hidden space-y-4 pt-4 border-t-2 border-dashed border-bocatta-sand">
+          <h4 class="font-serif text-base font-bold text-bocatta-wine flex items-center gap-2">
+            <i class="fa-solid fa-motorcycle text-bocatta-red"></i> Datos de Entrega y Pago
+          </h4>
+
+          <!-- Delivery Modality Tabs -->
+          <div class="grid grid-cols-3 gap-1.5 bg-bocatta-sand/50 p-1 rounded-xl text-xs font-bold">
+            <button type="button" onclick="setOrderModality('Pedido a Domicilio')" id="mod-domicilio" class="py-2 px-2 rounded-lg bg-bocatta-red text-white shadow transition">
+               Domicilio
+            </button>
+            <button type="button" onclick="setOrderModality('Pasar a Recoger (Pick-up)')" id="mod-pickup" class="py-2 px-2 rounded-lg text-bocatta-wine hover:bg-white/50 transition">
+               Recoger
+            </button>
+            <button type="button" onclick="setOrderModality('Consumo en el Local (Pre-orden)')" id="mod-mesa" class="py-2 px-2 rounded-lg text-bocatta-wine hover:bg-white/50 transition">
+               En Local
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Tu Nombre *</label>
+                <input type="text" id="order-name" placeholder="Ej. Carlos Hernández" oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Teléfono de Contacto *</label>
+                <input type="tel" id="order-phone" placeholder="Ej. 756 100 0000" oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red" />
+              </div>
+            </div>
+
+            <div id="order-address-group">
+              <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Dirección completa y Referencias (Chilapa) *</label>
+              <textarea id="order-address" rows="2" placeholder="Calle, número, barrio/colonia y referencias de fachada..." oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Método de Pago</label>
+                <select id="order-payment" onchange="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red">
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia">Transferencia</option>
+                </select>
+              </div>
+              <div id="order-cash-group">
+                <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">¿Con cuánto pagas?</label>
+                <input type="text" id="order-cash-amount" placeholder="Ej. Billete de $500 / Exacto" oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Notas Generales de Cocina (Opcional)</label>
+              <input type="text" id="order-general-notes" placeholder="Ej. Incluir palillos para 3 personas, salsa soya extra..." oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red" />
+            </div>
+          </div>
+
+          <!-- Live Formatted WhatsApp Ticket Preview -->
+          <div class="bg-white p-3.5 rounded-2xl border border-bocatta-sand space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-bocatta-red">Ticket listo para WhatsApp:</span>
+              <button type="button" onclick="copyOrderTicket()" class="text-[11px] text-bocatta-wine hover:text-bocatta-red font-semibold flex items-center gap-1">
+                <i class="fa-regular fa-copy"></i> Copiar
+              </button>
+            </div>
+            <pre id="whatsapp-order-preview" class="whitespace-pre-wrap font-sans text-[11px] text-bocatta-wine/90 bg-bocatta-creamLight p-2.5 rounded-xl border border-bocatta-sand/60 max-h-40 overflow-y-auto leading-relaxed"></pre>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer -->
+      <div id="cart-footer" class="hidden p-4 bg-white border-t border-bocatta-sand space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-bocatta-wine/70">Total Estimado del Pedido:</span>
+          <span id="cart-drawer-total" class="font-serif text-2xl font-extrabold text-bocatta-red">$0</span>
+        </div>
+
+        <button 
+          type="button" 
+          onclick="sendOrderViaWhatsApp()" 
+          class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm"
+        >
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          Enviar Pedido a Bōcatta (756 115 9334)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION MESSAGE BOX (No alert() used!) -->
+  <div id="toast-notification" class="fixed top-16 right-4 z-50 hidden max-w-sm bg-bocatta-wine text-bocatta-cream px-4 py-3 rounded-2xl shadow-2xl border-2 border-bocatta-red flex items-center gap-3">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-bocatta-red text-lg"></i>
+    <span id="toast-message" class="text-xs font-semibold">Acción completada</span>
+  </div>
+
+  <!-- COMPLETE APPLICATION LOGIC -->
+  <script>
+    const BOCATTA_WHATSAPP = "527561159334";
+
+    // Salsas oficiales para Alitas y Boneless
+    const SAUCES_LIST = [
+      "BBQ",
+      "Mango habanero",
+      "Tamarindo habanero",
+      "Piña habanero",
+      "Búfalo",
+      "Honey mostaza"
+    ];
+
+    // Extras oficiales para bebidas de cafetería / frappés / matcha
+    const COFFEE_EXTRAS = [
+      { id: "sin-extra", name: "Sin extra", price: 0 },
+      { id: "cold-foam", name: "Cold foam", price: 5 },
+      { id: "perlas", name: "Perlas explosivas", price: 10 },
+      { id: "escarchado", name: "Escarchado", price: 10 }
+    ];
+
+    // Lista de todos los rollos individuales para la Charola de 5 Rollos
+    const ALL_ROLLS_FOR_PLATTER = [
+      { name: "California especial (Normal)", price: 110 },
+      { name: "California especial (Empanizado)", price: 120 },
+      { name: "Avocado roll", price: 115 },
+      { name: "Monkey roll", price: 120 },
+      { name: "Inroll", price: 120 },
+      { name: "Dragon roll", price: 120 },
+      { name: "Kani roll", price: 125 },
+      { name: "Sunset roll", price: 125 },
+      { name: "Crispy roll (Empanizado)", price: 115 },
+      { name: "Tropicoco roll (Empanizado)", price: 120 },
+      { name: "Dorito roll (Empanizado)", price: 120 },
+      { name: "Tampico roll (Empanizado)", price: 125 },
+      { name: "Cheezy roll (Empanizado)", price: 130 },
+      { name: "Spicy mexican roll (Empanizado)", price: 130 },
+      { name: "Norteñito roll (Gratinado)", price: 130 },
+      { name: "Norteñito roll (Sin gratinar)", price: 115 }
+    ];
+
+    // Categorías del Menú Digital (Iconos vectoriales limpios, CERO emojis)
+    const CATEGORIES = [
+      { id: "todos", name: "Todos", icon: "fa-utensils" },
+      { id: "entradas", name: "Entradas", icon: "fa-bowl-rice" },
+      { id: "rollos-especiales", name: "Rollos Especiales", icon: "fa-circle-dot" },
+      { id: "rollos-empanizados", name: "Rollos Empanizados", icon: "fa-fire-flame-curved" },
+      { id: "fuera-del-roll", name: "Fuera del Roll", icon: "fa-burger" },
+      { id: "infantil-postres", name: "Infantil y Postres", icon: "fa-cookie" },
+      { id: "cafeteria-matcha", name: "Cafetería y Matcha", icon: "fa-mug-hot" },
+      { id: "bar-cocteleria", name: "Bebidas con Alcohol", icon: "fa-wine-glass" }
+    ];
+
+    // Base de datos completa del Menú de Bōcatta Food Spot (Sin ningún emoji)
+    const MENU_ITEMS = [
+      // ================= ENTRADAS =================
+      {
+        id: "yakimeshi",
+        category: "entradas",
+        categoryLabel: "Entradas",
+        name: "Yakimeshi",
+        badge: "Clásico Japonés",
+        icon: "fa-bowl-rice",
+        description: "Arroz frito estilo japonés salteado con verduras, res, pollo y camarón con toque de soya.",
+        basePrice: 70,
+        priceDisplay: "$70 - $110",
+        variantsLabel: "Elige tu versión de Yakimeshi *",
+        variants: [
+          { name: "Verduras ($70)", price: 70 },
+          { name: "Camarón ($95)", price: 95 },
+          { name: "Arrachera ($100)", price: 100 },
+          { name: "Mixto ($110)", price: 110 }
+        ]
+      },
+      {
+        id: "kushiages",
+        category: "entradas",
+        categoryLabel: "Entradas",
+        name: "Kushiages (Orden 3 piezas)",
+        icon: "fa-utensils",
+        description: "Brochetas empanizadas y crujientes (Orden de 3 piezas).",
+        basePrice: 95,
+        priceDisplay: "$95 - $115",
+        variantsLabel: "Elige el relleno de tus Kushiages *",
+        variants: [
+          { name: "Queso (3 piezas - $95)", price: 95 },
+          { name: "Plátano + philadelphia (3 piezas - $95)", price: 95 },
+          { name: "Camarón + philadelphia (3 piezas - $115)", price: 115 }
+        ]
+      },
+      {
+        id: "edamames",
+        category: "entradas",
+        categoryLabel: "Entradas",
+        name: "Edamames",
+        icon: "fa-seedling",
+        description: "Vainas de soja al vapor o tempura, sazonadas y perfectas para botanear.",
+        basePrice: 50,
+        priceDisplay: "$50 - $65",
+        variantsLabel: "Elige la preparación *",
+        variants: [
+          { name: "Al vapor ($50)", price: 50 },
+          { name: "Tempura ($65)", price: 65 }
+        ]
+      },
+
+      // ================= ROLLOS ESPECIALES =================
+      {
+        id: "california-especial",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "California especial",
+        icon: "fa-circle-dot",
+        description: "Por fuera: ajonjolí / masago. Por dentro: pepino, aguacate, philadelphia, camarón o surimi.",
+        basePrice: 110,
+        priceDisplay: "$110 / $120",
+        variantsLabel: "Elige la preparación del rollo *",
+        variants: [
+          { name: "Normal ($110)", price: 110 },
+          { name: "Empanizado ($120)", price: 120 }
+        ]
+      },
+      {
+        id: "avocado-roll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Avocado roll",
+        icon: "fa-leaf",
+        description: "Por fuera: aguacate, ajonjolí, salsa de anguila. Por dentro: camarón empanizado, philadelphia, pepino.",
+        basePrice: 115,
+        priceDisplay: "$115",
+        variants: [{ name: "Orden completa ($115)", price: 115 }]
+      },
+      {
+        id: "monkey-roll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Monkey roll",
+        badge: "Favorito",
+        icon: "fa-star",
+        description: "Por fuera: plátano frito, philadelphia, salsa de anguila. Por dentro: camarón empanizado, pepino, philadelphia.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden completa ($120)", price: 120 }]
+      },
+      {
+        id: "inroll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Inroll",
+        icon: "fa-circle-dot",
+        description: "Por fuera: láminas de pepino, tampico, aguacate, ajonjolí. Por dentro: salmón, philadelphia, aguacate.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden completa ($120)", price: 120 }]
+      },
+      {
+        id: "dragon-roll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Dragon roll",
+        icon: "fa-fire",
+        description: "Por fuera: salmón flameado, philadelphia, aguacate, chipotle. Por dentro: camarón empanizado, pepino.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden completa ($120)", price: 120 }]
+      },
+      {
+        id: "kani-roll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Kani roll",
+        icon: "fa-circle-dot",
+        description: "Por fuera: kanikama, aguacate, mayo chipotle, anguila. Por dentro: camarón empanizado, philadelphia, pepino.",
+        basePrice: 125,
+        priceDisplay: "$125",
+        variants: [{ name: "Orden completa ($125)", price: 125 }]
+      },
+      {
+        id: "sunset-roll",
+        category: "rollos-especiales",
+        categoryLabel: "Rollos Especiales",
+        name: "Sunset roll",
+        icon: "fa-sun",
+        description: "Por fuera: mango, aguacate, ajonjolí. Por dentro: camarón empanizado, philadelphia, pepino.",
+        basePrice: 125,
+        priceDisplay: "$125",
+        variants: [{ name: "Orden completa ($125)", price: 125 }]
+      },
+
+      // ================= ROLLOS EMPANIZADOS =================
+      {
+        id: "crispy-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Crispy roll",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado de panko, tampico, anguila. Por dentro: res, pollo, tocino, philadelphia, aguacate.",
+        basePrice: 115,
+        priceDisplay: "$115",
+        variants: [{ name: "Orden completa ($115)", price: 115 }]
+      },
+      {
+        id: "tropicoco-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Tropicoco roll",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado de coco, philadelphia, mango. Por dentro: camarón empanizado, philadelphia, aguacate.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden completa ($120)", price: 120 }]
+      },
+      {
+        id: "dorito-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Dorito roll",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado de doritos, mayo chipotle. Por dentro: camarón, philadelphia, aguacate, pepino.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden completa ($120)", price: 120 }]
+      },
+      {
+        id: "tampico-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Tampico roll",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado, topping de tampico, anguila. Por dentro: camarón, philadelphia, aguacate, pepino.",
+        basePrice: 125,
+        priceDisplay: "$125",
+        variants: [{ name: "Orden completa ($125)", price: 125 }]
+      },
+      {
+        id: "cheezy-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Cheezy roll",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado, gratinado de quesos con tocino y chiles toreados. Por dentro: res, tocino, philadelphia, aguacate.",
+        basePrice: 130,
+        priceDisplay: "$130",
+        variants: [{ name: "Orden completa ($130)", price: 130 }]
+      },
+      {
+        id: "spicy-mexican-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Spicy mexican roll",
+        badge: "Picante",
+        icon: "fa-pepper-hot",
+        description: "Por fuera: empanizado con chiles toreados, tocino, mayo chipotle. Por dentro: arrachera, philadelphia, aguacate, pepino.",
+        basePrice: 130,
+        priceDisplay: "$130",
+        variants: [{ name: "Orden completa ($130)", price: 130 }]
+      },
+      {
+        id: "nortenito-roll",
+        category: "rollos-empanizados",
+        categoryLabel: "Rollos Empanizados",
+        name: "Norteñito roll gratinado",
+        icon: "fa-fire-flame-curved",
+        description: "Por fuera: empanizado, gratinado con arrachera, tocino y chiles. Disponible gratinado o sin gratinar.",
+        basePrice: 115,
+        priceDisplay: "$115 / $130",
+        variantsLabel: "Elige tu versión del Norteñito *",
+        variants: [
+          { name: "Gratinado ($130)", price: 130 },
+          { name: "Sin gratinar ($115)", price: 115 }
+        ]
+      },
+      {
+        id: "bocatta-ball",
+        category: "rollos-empanizados",
+        categoryLabel: "Especialidad de la Casa",
+        name: "Bōcatta ball",
+        badge: "Signature",
+        icon: "fa-award",
+        description: "Bola de arroz rellena de philadelphia, aguacate y pepino, empanizada con tampico y anguila. Proteína a elegir.",
+        basePrice: 145,
+        priceDisplay: "$145",
+        variants: [{ name: "Bōcatta ball ($145)", price: 145 }],
+        secondaryLabel: "Elige la proteína obligatoria de tu Bōcatta ball *",
+        secondaryOptions: ["Camarón empanizado", "Salmón", "Arrachera"]
+      },
+      {
+        id: "promo-charola-card",
+        category: "rollos-empanizados",
+        categoryLabel: "Promoción Especial (-10%)",
+        name: "Charola de 5 Rollos Surtidos",
+        badge: "10% Descuento",
+        icon: "fa-layer-group",
+        isCharolaTrigger: true,
+        description: "Elige 5 rollos cualesquiera de nuestro menú (Especiales o Empanizados) con 10% de descuento automático sobre el total. No aplica con otras promociones.",
+        basePrice: 500,
+        priceDisplay: "-10% Total",
+        variants: []
+      },
+
+      // ================= FUERA DEL ROLL =================
+      {
+        id: "papas-entradas",
+        category: "fuera-del-roll",
+        categoryLabel: "Fuera del Roll",
+        name: "Orden de Papas",
+        icon: "fa-utensils",
+        description: "Papas recién hechas y crujientes. Disponibles a la francesa, gajo o waffle.",
+        basePrice: 50,
+        priceDisplay: "$50 - $66",
+        variantsLabel: "Elige el corte de tus papas *",
+        variants: [
+          { name: "Papas a la francesa ($50)", price: 50 },
+          { name: "Papas gajo ($56)", price: 56 },
+          { name: "Papas waffle ($66)", price: 66 }
+        ]
+      },
+      {
+        id: "hamburguesa-arrachera",
+        category: "fuera-del-roll",
+        categoryLabel: "Fuera del Roll",
+        name: "Hamburguesa arrachera",
+        badge: "Top Grill",
+        icon: "fa-burger",
+        description: "Jugosa hamburguesa de arrachera preparada al momento con ingredientes frescos.",
+        basePrice: 130,
+        priceDisplay: "$130",
+        variants: [{ name: "Hamburguesa arrachera ($130)", price: 130 }]
+      },
+      {
+        id: "cheese-sticks",
+        category: "fuera-del-roll",
+        categoryLabel: "Fuera del Roll",
+        name: "Cheese sticks (Orden 4 piezas)",
+        icon: "fa-utensils",
+        description: "Orden de 4 piezas de dedos de queso empanizados y dorados.",
+        basePrice: 90,
+        priceDisplay: "$90",
+        variants: [{ name: "Orden 4 piezas ($90)", price: 90 }]
+      },
+      {
+        id: "alitas-6pzas",
+        category: "fuera-del-roll",
+        categoryLabel: "Fuera del Roll",
+        name: "Alitas (Orden 6 piezas)",
+        icon: "fa-drumstick-bite",
+        description: "Orden de 6 piezas bañadas en tu salsa a elegir: BBQ, Mango habanero, Tamarindo habanero, Piña habanero, Búfalo o Honey mostaza.",
+        basePrice: 150,
+        priceDisplay: "$150",
+        variants: [{ name: "Orden 6 piezas ($150)", price: 150 }],
+        secondaryLabel: "Elige tu salsa obligatoria *",
+        secondaryOptions: SAUCES_LIST
+      },
+      {
+        id: "boneless-300gr",
+        category: "fuera-del-roll",
+        categoryLabel: "Fuera del Roll",
+        name: "Boneless (Orden 300gr)",
+        badge: "Más Pedido",
+        icon: "fa-fire",
+        description: "Orden de 300 gramos de boneless crujientes bañados en tu salsa favorita.",
+        basePrice: 120,
+        priceDisplay: "$120",
+        variants: [{ name: "Orden 300gr ($120)", price: 120 }],
+        secondaryLabel: "Elige tu salsa obligatoria *",
+        secondaryOptions: SAUCES_LIST
+      },
+
+      // ================= MENÚ INFANTIL Y POSTRES =================
+      {
+        id: "dinonuggets",
+        category: "infantil-postres",
+        categoryLabel: "Menú Infantil",
+        name: "Dinonuggets (Incluye papas)",
+        icon: "fa-child-reaching",
+        description: "Nuggets de pollo acompañados de orden de papas a la francesa.",
+        basePrice: 58,
+        priceDisplay: "$58",
+        variants: [{ name: "Orden con papas ($58)", price: 58 }]
+      },
+      {
+        id: "alitas-boneless-infantil",
+        category: "infantil-postres",
+        categoryLabel: "Menú Infantil",
+        name: "Alitas ó Boneless Infantil",
+        icon: "fa-child-reaching",
+        description: "Naturales (sin picante) e incluyen orden de papas.",
+        basePrice: 100,
+        priceDisplay: "$100",
+        variantsLabel: "Elige Alitas o Boneless naturales *",
+        variants: [
+          { name: "Boneless naturales + papas ($100)", price: 100 },
+          { name: "Alitas naturales + papas ($100)", price: 100 }
+        ]
+      },
+      {
+        id: "galletas-gourmet",
+        category: "infantil-postres",
+        categoryLabel: "Postres · Maka Cookie",
+        name: "Galletas gourmet",
+        icon: "fa-cookie",
+        description: "Galleta gourmet recién horneada. Pregunta por los sabores del día.",
+        basePrice: 45,
+        priceDisplay: "$45",
+        variants: [{ name: "Galleta gourmet ($45)", price: 45 }]
+      },
+      {
+        id: "brownies",
+        category: "infantil-postres",
+        categoryLabel: "Postres",
+        name: "Brownies",
+        icon: "fa-cake-candles",
+        description: "Suave brownie de chocolate casero, solo o acompañado con bola de helado.",
+        basePrice: 35,
+        priceDisplay: "$35 / $45",
+        variantsLabel: "Elige tu presentación *",
+        variants: [
+          { name: "Brownie tradicional ($35)", price: 35 },
+          { name: "Brownie + helado ($45)", price: 45 }
+        ]
+      },
+      {
+        id: "roles-de-canela",
+        category: "infantil-postres",
+        categoryLabel: "Postres",
+        name: "Roles de canela",
+        icon: "fa-bread-slice",
+        description: "Esponjosos roles de canela recién horneados en versión tradicional o sabores especiales.",
+        basePrice: 40,
+        priceDisplay: "$40 / $50",
+        variantsLabel: "Elige tu Rol de Canela *",
+        variants: [
+          { name: "Tradicional ($40)", price: 40 },
+          { name: "Sabores ($50)", price: 50 }
+        ]
+      },
+
+      // ================= CAFETERÍA Y MATCHA =================
+      {
+        id: "ice-lattes",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Frías · Café de Especialidad",
+        name: "Ice Lattes",
+        badge: "Café Especialidad",
+        description: "Preparados con café de especialidad en las rocas. Puedes personalizar con Cold Foam o Perlas.",
+        basePrice: 60,
+        priceDisplay: "$60 - $80",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige el sabor de tu Ice Latte *",
+        variants: [
+          { name: "Clásico ($60)", price: 60 },
+          { name: "Vainilla ($65)", price: 65 },
+          { name: "Caramelo ($70)", price: 70 },
+          { name: "Avellana ($70)", price: 70 },
+          { name: "Chai vainilla ($70)", price: 70 },
+          { name: "Brown sugar ($70)", price: 70 },
+          { name: "Horchata latte ($75)", price: 75 },
+          { name: "Taro sin café ($77)", price: 77 },
+          { name: "Biscoff ($80)", price: 80 }
+        ]
+      },
+      {
+        id: "matcha-bar",
+        category: "cafeteria-matcha",
+        categoryLabel: "What's Matcha? · Barra Matcha",
+        name: "Matcha Ice Lattes & Frappé",
+        badge: "Grado Ceremonial",
+        isMatcha: true,
+        description: "Té verde japonés de grado ceremonial, más puro, suave, cremoso y delicado en sabor.",
+        basePrice: 75,
+        priceDisplay: "$75 - $80",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige tu bebida de Matcha *",
+        variants: [
+          { name: "Matcha mix Latte ($75)", price: 75 },
+          { name: "Matcha ceremonial Latte ($80)", price: 80 },
+          { name: "Matcha mango ($80)", price: 80 },
+          { name: "Matcha fresa ($80)", price: 80 },
+          { name: "Honey matcha ($80)", price: 80 },
+          { name: "Frappe Matcha ($80)", price: 80 }
+        ]
+      },
+      {
+        id: "frappes-clasicos",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Frías",
+        name: "Frappés Clásicos",
+        description: "Frappés cremosos coronados con crema batida.",
+        basePrice: 78,
+        priceDisplay: "$78",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige el sabor de tu Frappé ($78) *",
+        variants: [
+          { name: "Caramelo", price: 78 },
+          { name: "Moka", price: 78 },
+          { name: "Cookies and cream", price: 78 },
+          { name: "Chocolate blanco", price: 78 },
+          { name: "Taro", price: 78 },
+          { name: "Nutella", price: 78 },
+          { name: "Fresas con crema", price: 78 },
+          { name: "Piña coco", price: 78 },
+          { name: "Cereza", price: 78 }
+        ]
+      },
+      {
+        id: "frappes-top",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Frías",
+        name: "Frappés Top",
+        badge: "Indulgente",
+        description: "Nuestros frappés especiales con toppings premium.",
+        basePrice: 88,
+        priceDisplay: "$88",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige el sabor de tu Frappé Top ($88) *",
+        variants: [
+          { name: "Ferrero", price: 88 },
+          { name: "Chocorrol", price: 88 },
+          { name: "Snickers", price: 88 },
+          { name: "Mazapán", price: 88 }
+        ]
+      },
+      {
+        id: "soda-italiana",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Refrescantes",
+        name: "Soda Italiana",
+        description: "Bebida burbujeante y refrescante. Ideal con perlas explosivas.",
+        basePrice: 50,
+        priceDisplay: "$50",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige el sabor de tu Soda Italiana ($50) *",
+        variants: [
+          { name: "Mora azul", price: 50 },
+          { name: "Manzana verde", price: 50 },
+          { name: "Mango", price: 50 },
+          { name: "Pink lemonade", price: 50 }
+        ]
+      },
+      {
+        id: "smoothies",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Frías",
+        name: "Smoothies Frutales",
+        description: "Smoothies de fruta natural congelada.",
+        basePrice: 68,
+        priceDisplay: "$68",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige el sabor de tu Smoothie ($68) *",
+        variants: [
+          { name: "Frutos rojos", price: 68 },
+          { name: "Mango", price: 68 },
+          { name: "Maracuyá", price: 68 }
+        ]
+      },
+      {
+        id: "bebidas-calientes",
+        category: "cafeteria-matcha",
+        categoryLabel: "Bebidas Calientes · Café & Tisanas",
+        name: "Barra de Café Caliente y Tisanas",
+        description: "More espresso, less depresso. Café recién extraído y tisanas frutales.",
+        basePrice: 30,
+        priceDisplay: "$30 - $65",
+        variantsLabel: "Elige tu bebida caliente *",
+        variants: [
+          { name: "Expresso ($30)", price: 30 },
+          { name: "Americano ($45)", price: 45 },
+          { name: "Capuchino Clásico ($60)", price: 60 },
+          { name: "Tisanas frutales ($60)", price: 60 },
+          { name: "Capuchino avellana ($65)", price: 65 },
+          { name: "Capuchino vainilla ($65)", price: 65 },
+          { name: "Chai vainilla caliente ($65)", price: 65 },
+          { name: "Chocolate con leche ($65)", price: 65 }
+        ]
+      },
+      {
+        id: "otras-bebidas",
+        category: "cafeteria-matcha",
+        categoryLabel: "Otras Bebidas",
+        name: "Aguas, Refrescos y Topo Chico",
+        description: "Bebidas embotelladas bien frías.",
+        basePrice: 15,
+        priceDisplay: "$15 - $38",
+        variantsLabel: "Selecciona tu bebida *",
+        variants: [
+          { name: "Agua embotellada ($15)", price: 15 },
+          { name: "Jugo envasado ($22)", price: 22 },
+          { name: "Refrescos de sabor ($36)", price: 36 },
+          { name: "Topo Chico ($38)", price: 38 }
+        ]
+      },
+
+      // ================= BAR Y COCTELERÍA =================
+      {
+        id: "cervezas",
+        category: "bar-cocteleria",
+        categoryLabel: "Bebidas con Alcohol",
+        name: "Cervezas",
+        description: "Cervezas bien frías. Opción de agregar vaso escarchado (+$10).",
+        basePrice: 30,
+        priceDisplay: "$30 - $42",
+        allowCoffeeExtras: true,
+        variantsLabel: "Elige tu cerveza *",
+        variants: [
+          { name: "Corona ($30)", price: 30 },
+          { name: "Victoria ($30)", price: 30 },
+          { name: "XX Lager ($30)", price: 30 },
+          { name: "Modelo especial ($42)", price: 42 }
+        ]
+      },
+      {
+        id: "mojitos",
+        category: "bar-cocteleria",
+        categoryLabel: "Coctelería Refrescante",
+        name: "Mojitos Cubanos",
+        badge: "Coctelería",
+        description: "Preparados al momento con hierbabuena fresca, limón y ron.",
+        basePrice: 88,
+        priceDisplay: "$88",
+        variantsLabel: "Elige el sabor de tu Mojito ($88) *",
+        variants: [
+          { name: "Mango", price: 88 },
+          { name: "Tradicional", price: 88 },
+          { name: "Frutos rojos", price: 88 }
+        ]
+      },
+      {
+        id: "cocteleria-autor",
+        category: "bar-cocteleria",
+        categoryLabel: "Spritz & Carajillo",
+        name: "Carajillo & Spritz",
+        description: "Tragos largos y digestivos ideales para acompañar tu cena.",
+        basePrice: 98,
+        priceDisplay: "$98 - $140",
+        variantsLabel: "Elige tu coctel *",
+        variants: [
+          { name: "Carajillo ($98)", price: 98 },
+          { name: "Aperol spritz ($130)", price: 130 },
+          { name: "St germain spritz ($140)", price: 140 }
+        ]
+      },
+      {
+        id: "vinos",
+        category: "bar-cocteleria",
+        categoryLabel: "Vino Tinto y Rosado",
+        name: "Selección de Vinos (Copa o Botella)",
+        description: "Vinos tintos y rosados servidos por copa o botella.",
+        basePrice: 65,
+        priceDisplay: "$65 - $650",
+        variantsLabel: "Elige tu etiqueta y presentación *",
+        variants: [
+          { name: "Tinto Riunite lambrusco - Copa ($75)", price: 75 },
+          { name: "Tinto Riunite lambrusco - Botella ($330)", price: 330 },
+          { name: "Tinto MATSU tempranillo - Copa ($75)", price: 75 },
+          { name: "Tinto MATSU tempranillo - Botella ($650)", price: 650 },
+          { name: "Rosado Blanc de zinfandel - Copa ($65)", price: 65 },
+          { name: "Rosado Blanc de zinfandel - Botella ($345)", price: 345 }
+        ]
+      },
+      {
+        id: "destilados",
+        category: "bar-cocteleria",
+        categoryLabel: "Whisky y Tequila",
+        name: "Destilados (Copa o Botella)",
+        description: "Etiquetas de Whisky y Tequila por copeo o botella para tu mesa.",
+        basePrice: 62,
+        priceDisplay: "$62 - $1,298",
+        variantsLabel: "Elige tu destilado *",
+        variants: [
+          { name: "Whisky Red Label - Copa ($62)", price: 62 },
+          { name: "Whisky Red Label - Botella ($650)", price: 650 },
+          { name: "Whisky Grand Old Parr - Copa ($110)", price: 110 },
+          { name: "Whisky Grand Old Parr - Botella ($1,298)", price: 1298 },
+          { name: "Whisky Buchanan's - Copa ($102)", price: 102 },
+          { name: "Tequila José Cuervo Especial - Copa ($65)", price: 65 },
+          { name: "Tequila José Cuervo Especial - Botella ($598)", price: 598 },
+          { name: "Tequila Maestro Dobel Diamante - Copa ($75)", price: 75 },
+          { name: "Tequila Maestro Dobel Diamante - Botella ($1,110)", price: 1110 }
+        ]
+      }
+    ];
+
+    // Estado de la Aplicación
+    let currentCategory = "todos";
+    let searchQuery = "";
+    let cart = [];
+    let orderModality = "Pedido a Domicilio";
+
+    // Estado del Modal de Personalización
+    let activeModalItem = null;
+    let selectedVariantIndex = 0;
+    let selectedSecondaryOption = "";
+    let selectedExtras = [];
+    let modalQuantity = 1;
+
+    // Inicializar al cargar la página
+    window.addEventListener("DOMContentLoaded", () => {
+      updateStoreStatus();
+      renderCategoryTabs();
+      renderMenuGrid();
+      setupMenuGridDelegation();
+      initDefaultReservationDate();
+      updateReservationPreview();
+      updateCartUI();
+    });
+
+    // Navegación suave hacia secciones (Ordenar Ahora / Reservar Mesa)
+    function scrollToSection(sectionId) {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    // Delegación de eventos 100% confiable en #menu-grid y #category-tabs
+    function setupMenuGridDelegation() {
+      const grid = document.getElementById("menu-grid");
+      if (grid) {
+        grid.addEventListener("click", (e) => {
+          const actionBtn = e.target.closest("[data-menu-action]");
+          if (!actionBtn) return;
+
+          e.preventDefault();
+          const action = actionBtn.getAttribute("data-menu-action");
+          const itemId = actionBtn.getAttribute("data-item-id");
+
+          if (action === "charola") {
+            openCharolaBuilder();
+          } else if (action === "customize" && itemId) {
+            openItemModal(itemId);
+          } else if (action === "quick-add" && itemId) {
+            quickAddDish(itemId);
+          }
+        });
+      }
+    }
+
+    // Agregar directo en 1 clic para platillos de una sola opción (sin variantes obligatorias)
+    function quickAddDish(itemId) {
+      const item = MENU_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+
+      // Si el platillo requiere elegir variante, salsa, proteína o tiene extras, abrir modal de personalización
+      const hasMultipleChoices = item.variants.length > 1 || (item.secondaryOptions && item.secondaryOptions.length > 0) || item.allowCoffeeExtras;
+      if (hasMultipleChoices) {
+        openItemModal(itemId);
+        return;
+      }
+
+      const defaultVariant = item.variants[0] || { name: item.name, price: item.basePrice };
+      const existingItem = cart.find(c => c.itemId === item.id && !c.details);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          cartId: Date.now() + Math.random().toString(36).substring(2, 6),
+          itemId: item.id,
+          name: item.name,
+          details: "",
+          unitPrice: defaultVariant.price,
+          quantity: 1
+        });
+      }
+
+      updateCartUI(true);
+      showToast(`¡1x ${item.name} ($${defaultVariant.price}) agregado al pedido!`);
+    }
+
+    // 1. VERIFICADOR DE HORARIO EN TIEMPO REAL (Mar-Dom 5:30 PM a 10:00 PM)
+    function updateStoreStatus() {
+      const mode = document.getElementById("sim-status-select").value;
+      const dot = document.getElementById("status-dot");
+      const text = document.getElementById("status-text");
+
+      let isOpen = false;
+      let statusLabel = "";
+
+      if (mode === "open") {
+        isOpen = true;
+        statusLabel = "Abierto ahora · Servicio hasta las 10:00 PM (Simulado)";
+      } else if (mode === "closed") {
+        isOpen = false;
+        statusLabel = "Cerrado en este momento · Puedes pre-ordenar o reservar mesa";
+      } else {
+        const now = new Date();
+        const day = now.getDay(); // 0 = Domingo, 1 = Lunes, 2 = Martes...
+        const minutesOfDay = now.getHours() * 60 + now.getMinutes();
+        const openMinutes = 17 * 60 + 30; // 5:30 PM = 1050
+        const closeMinutes = 22 * 60;     // 10:00 PM = 1320
+
+        if (day === 1) {
+          isOpen = false;
+          statusLabel = "Hoy Lunes cerrado · Abrimos mañana martes de 5:30 PM a 10:00 PM";
+        } else if (minutesOfDay >= openMinutes && minutesOfDay <= closeMinutes) {
+          isOpen = true;
+          statusLabel = "¡Abierto ahora en Chilapa! · Cierra a las 10:00 PM";
+        } else if (minutesOfDay < openMinutes) {
+          isOpen = false;
+          statusLabel = "Cerrado ahora · Hoy abrimos de 5:30 PM a 10:00 PM (Pre-ordena ya)";
+        } else {
+          isOpen = false;
+          statusLabel = "Cerrado por hoy · Te esperamos de Mar a Dom de 5:30 a 10:00 PM";
+        }
+      }
+
+      if (isOpen) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+      }
+      text.textContent = statusLabel;
+    }
+
+    // 2. RENDERIZAR PESTAÑAS DE CATEGORÍAS
+    function renderCategoryTabs() {
+      const container = document.getElementById("category-tabs");
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = cat.id === currentCategory;
+        return `
+          <button
+            onclick="selectCategory('${cat.id}')"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition shrink-0 ${
+              isActive
+                ? "bg-bocatta-red text-white shadow-md scale-[1.02]"
+                : "bg-white text-bocatta-wine hover:bg-bocatta-sand/60 border border-bocatta-sand"
+            }"
+          >
+            <i class="fa-solid ${cat.icon}"></i>
+            <span>${cat.name}</span>
+          </button>
+        `;
+      }).join("");
+
+      const coffeeBanner = document.getElementById("coffee-extras-banner");
+      if (currentCategory === "cafeteria-matcha" || currentCategory === "todos") {
+        coffeeBanner.classList.remove("hidden");
+      } else {
+        coffeeBanner.classList.add("hidden");
+      }
+    }
+
+    function selectCategory(catId) {
+      currentCategory = catId;
+      renderCategoryTabs();
+      renderMenuGrid();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById("clear-search-btn");
+      if (searchQuery.length > 0) {
+        clearBtn.classList.remove("hidden");
+      } else {
+        clearBtn.classList.add("hidden");
+      }
+      renderMenuGrid();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById("menu-search");
+      input.value = "";
+      handleSearch("");
+    }
+
+    // 3. RENDERIZAR TARJETAS DEL MENÚ (SIN EMOJIS EN PANELES DE COMIDA, ESTILO EDITORIAL)
+    function renderMenuGrid() {
+      const grid = document.getElementById("menu-grid");
+      const emptyState = document.getElementById("empty-search-state");
+
+      const filtered = MENU_ITEMS.filter(item => {
+        const matchesCat = currentCategory === "todos" || item.category === currentCategory;
+        const matchesSearch = !searchQuery || 
+          item.name.toLowerCase().includes(searchQuery) ||
+          item.description.toLowerCase().includes(searchQuery) ||
+          item.categoryLabel.toLowerCase().includes(searchQuery) ||
+          (item.variants && item.variants.some(v => v.name.toLowerCase().includes(searchQuery)));
+        return matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      grid.innerHTML = filtered.map(item => {
+        // Tarjeta especial de Charola de 5 Rollos Surtidos (-10%) sin emoji dentro de la tarjeta
+        if (item.isCharolaTrigger) {
+          return `
+            <article class="bg-bocatta-wine text-bocatta-cream rounded-2xl p-5 shadow-md hover:shadow-xl border-2 border-bocatta-red transition flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-bocatta-sand">
+                    ${item.categoryLabel}
+                  </span>
+                  <span class="bg-bocatta-red text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                    ${item.badge}
+                  </span>
+                </div>
+
+                <div class="flex items-baseline justify-between gap-2 pb-2">
+                  <h3 class="font-serif text-lg sm:text-xl font-bold text-bocatta-cream leading-snug">
+                    ${item.name}
+                  </h3>
+                  <span class="flex-1 border-b-2 border-dotted border-bocatta-sand/40 mx-1"></span>
+                  <span class="font-serif text-lg font-extrabold text-bocatta-sand shrink-0">
+                    ${item.priceDisplay}
+                  </span>
+                </div>
+
+                <p class="text-xs text-bocatta-sand/90 leading-relaxed mt-1 mb-4">
+                  ${item.description}
+                </p>
+              </div>
+
+              <div class="pt-3 border-t border-white/15 flex items-center justify-between gap-3">
+                <span class="text-[11px] font-medium text-bocatta-sand/80">
+                  Elige tus 5 rollos favoritos
+                </span>
+                <button
+                  type="button"
+                  data-menu-action="charola"
+                  class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition shrink-0 cursor-pointer active:scale-95"
+                >
+                  Armar Charola (-10%)
+                </button>
+              </div>
+            </article>
+          `;
+        }
+
+        const hasMultipleChoices = item.variants.length > 1 || (item.secondaryOptions && item.secondaryOptions.length > 0) || item.allowCoffeeExtras;
+        const isMatchaCard = item.isMatcha === true;
+
+        return `
+          <article class="bg-white rounded-2xl p-5 shadow-xs hover:shadow-xl border-2 ${
+            isMatchaCard
+              ? "border-bocatta-matcha/50 hover:border-bocatta-matcha"
+              : "border-bocatta-sand/90 hover:border-bocatta-red"
+          } transition flex flex-col justify-between group">
+            <div>
+              <!-- Etiqueta de categoría y badge sin emojis -->
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-[0.15em] ${
+                  isMatchaCard ? "text-bocatta-matcha" : "text-bocatta-red"
+                }">
+                  ${item.categoryLabel}
+                </span>
+                ${
+                  item.badge
+                    ? `<span class="shrink-0 ${
+                        isMatchaCard
+                          ? "bg-bocatta-matcha text-white"
+                          : "bg-bocatta-wine text-bocatta-cream"
+                      } text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">${item.badge}</span>`
+                    : ""
+                }
+              </div>
+
+              <!-- Encabezado Editorial: Nombre en Serif + Línea punteada clásica + Precio destacado -->
+              <div class="flex items-baseline justify-between gap-2 pb-2">
+                <h3 class="font-serif text-lg sm:text-xl font-bold text-bocatta-wine leading-snug">
+                  ${item.name}
+                </h3>
+                <span class="flex-1 border-b-2 border-dotted ${
+                  isMatchaCard ? "border-bocatta-matcha/40" : "border-bocatta-red/40"
+                } mx-1"></span>
+                <span class="font-serif text-lg font-extrabold ${
+                  isMatchaCard ? "text-bocatta-matcha" : "text-bocatta-red"
+                } shrink-0">
+                  ${item.priceDisplay}
+                </span>
+              </div>
+
+              <!-- Descripción detallada de ingredientes -->
+              <p class="text-xs text-bocatta-wine/80 leading-relaxed mt-1 mb-4">
+                ${item.description}
+              </p>
+            </div>
+
+            <!-- Pie de tarjeta con botones interactivos 100% funcionales -->
+            <div class="pt-3 border-t border-bocatta-sand/70 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-medium text-bocatta-wine/60 truncate">
+                ${
+                  item.variants.length > 1
+                    ? `${item.variants.length} opciones a elegir`
+                    : item.secondaryOptions
+                    ? "Elige salsa / proteína"
+                    : item.allowCoffeeExtras
+                    ? "Personalizable"
+                    : "Listo para ordenar"
+                }
+              </span>
+
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${
+                  hasMultipleChoices
+                    ? `
+                      <button
+                        type="button"
+                        data-menu-action="customize"
+                        data-item-id="${item.id}"
+                        class="${
+                          isMatchaCard
+                            ? "bg-bocatta-matcha hover:bg-bocatta-wine"
+                            : "bg-bocatta-red hover:bg-bocatta-redDark"
+                        } text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition cursor-pointer active:scale-95"
+                      >
+                        Personalizar
+                      </button>
+                    `
+                    : `
+                      <button
+                        type="button"
+                        data-menu-action="customize"
+                        data-item-id="${item.id}"
+                        title="Agregar nota de cocina o cambiar cantidad"
+                        class="bg-bocatta-cream hover:bg-bocatta-sand text-bocatta-wine border border-bocatta-sand text-[11px] font-semibold px-2.5 py-2 rounded-xl transition cursor-pointer active:scale-95"
+                      >
+                        Notas
+                      </button>
+                      <button
+                        type="button"
+                        data-menu-action="quick-add"
+                        data-item-id="${item.id}"
+                        class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer active:scale-95"
+                      >
+                        + Agregar
+                      </button>
+                    `
+                }
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // 4. MODAL DE PERSONALIZACIÓN DE PLATILLOS Y BEBIDAS
+    function openItemModal(itemId) {
+      const item = MENU_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+
+      activeModalItem = item;
+      selectedVariantIndex = 0;
+      selectedSecondaryOption = item.secondaryOptions ? item.secondaryOptions[0] : "";
+      selectedExtras = [];
+      modalQuantity = 1;
+
+      document.getElementById("modal-item-category").textContent = item.categoryLabel;
+      document.getElementById("modal-item-title").textContent = item.name;
+      document.getElementById("modal-item-desc").textContent = item.description;
+      document.getElementById("modal-item-note").value = "";
+      document.getElementById("modal-item-qty").textContent = "1";
+
+      // Renderizar Variantes
+      const variantsContainer = document.getElementById("modal-variants-container");
+      const variantsLabel = document.getElementById("modal-variants-label");
+
+      variantsLabel.textContent = item.variantsLabel || "Presentación";
+      renderModalVariants();
+
+      // Renderizar Selector Secundario (Salsas de Alitas/Boneless o Proteína Bōcatta Ball)
+      const secContainer = document.getElementById("modal-secondary-container");
+      const secLabel = document.getElementById("modal-secondary-label");
+
+      if (item.secondaryOptions && item.secondaryOptions.length > 0) {
+        secContainer.classList.remove("hidden");
+        secLabel.textContent = item.secondaryLabel;
+        renderSecondaryOptions();
+      } else {
+        secContainer.classList.add("hidden");
+      }
+
+      // Renderizar Extras de Cafetería
+      const extrasContainer = document.getElementById("modal-extras-container");
+
+      if (item.allowCoffeeExtras) {
+        extrasContainer.classList.remove("hidden");
+        renderCoffeeExtras();
+      } else {
+        extrasContainer.classList.add("hidden");
+      }
+
+      updateModalCalculatedPrice();
+      document.getElementById("item-modal").classList.remove("hidden");
+    }
+
+    function renderModalVariants() {
+      const variantsList = document.getElementById("modal-variants-list");
+      if (!activeModalItem || !variantsList) return;
+
+      variantsList.innerHTML = activeModalItem.variants.map((v, idx) => {
+        const isSelected = idx === selectedVariantIndex;
+        return `
+          <button
+            type="button"
+            onclick="selectModalVariant(${idx})"
+            class="w-full flex items-center justify-between p-3 rounded-xl border-2 text-left cursor-pointer transition ${
+              isSelected
+                ? "border-bocatta-red bg-bocatta-red/10 font-bold"
+                : "border-bocatta-sand bg-white hover:border-bocatta-wine/40"
+            }"
+          >
+            <div class="flex items-center gap-2.5">
+              <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                isSelected ? "border-bocatta-red bg-bocatta-red" : "border-bocatta-wine/40"
+              }">
+                ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : ""}
+              </span>
+              <span class="text-xs text-bocatta-wine">${v.name}</span>
+            </div>
+            <span class="text-xs font-serif font-bold text-bocatta-red">$${v.price}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectModalVariant(index) {
+      selectedVariantIndex = index;
+      renderModalVariants();
+      updateModalCalculatedPrice();
+    }
+
+    function renderSecondaryOptions() {
+      const secList = document.getElementById("modal-secondary-list");
+      if (!activeModalItem || !secList) return;
+
+      secList.innerHTML = activeModalItem.secondaryOptions.map((opt, idx) => {
+        const isSelected = opt === selectedSecondaryOption;
+        return `
+          <button
+            type="button"
+            onclick="selectSecondaryOptionByIndex(${idx})"
+            class="p-2.5 rounded-xl border-2 text-xs text-left cursor-pointer transition flex items-center justify-between ${
+              isSelected
+                ? "border-bocatta-red bg-bocatta-red text-white font-bold shadow-xs"
+                : "border-bocatta-sand bg-white text-bocatta-wine hover:border-bocatta-wine/40"
+            }"
+          >
+            <span>${opt}</span>
+            ${isSelected ? '<i class="fa-solid fa-check text-[10px]"></i>' : ""}
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectSecondaryOptionByIndex(idx) {
+      if (!activeModalItem || !activeModalItem.secondaryOptions) return;
+      selectedSecondaryOption = activeModalItem.secondaryOptions[idx];
+      renderSecondaryOptions();
+    }
+
+    function renderCoffeeExtras() {
+      const extrasList = document.getElementById("modal-extras-list");
+      extrasList.innerHTML = COFFEE_EXTRAS.map(ex => {
+        const isChecked = (ex.id === "sin-extra" && selectedExtras.length === 0) || selectedExtras.some(e => e.id === ex.id);
+        return `
+          <button
+            type="button"
+            onclick="toggleCoffeeExtra('${ex.id}')"
+            class="p-2.5 rounded-xl border-2 text-xs transition flex flex-col items-start justify-between cursor-pointer ${
+              isChecked
+                ? "border-bocatta-wine bg-bocatta-wine text-white font-bold shadow-xs"
+                : "border-bocatta-sand bg-white text-bocatta-wine hover:border-bocatta-wine/40"
+            }"
+          >
+            <span>${ex.name}</span>
+            <span class="text-[11px] opacity-80">${ex.price === 0 ? "$0" : "+$" + ex.price}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function toggleCoffeeExtra(extraId) {
+      if (extraId === "sin-extra") {
+        selectedExtras = [];
+      } else {
+        const exists = selectedExtras.find(e => e.id === extraId);
+        if (exists) {
+          selectedExtras = selectedExtras.filter(e => e.id !== extraId);
+        } else {
+          const found = COFFEE_EXTRAS.find(e => e.id === extraId);
+          if (found) selectedExtras.push(found);
+        }
+      }
+      renderCoffeeExtras();
+      updateModalCalculatedPrice();
+    }
+
+    function changeModalQty(delta) {
+      modalQuantity = Math.max(1, modalQuantity + delta);
+      document.getElementById("modal-item-qty").textContent = modalQuantity;
+      updateModalCalculatedPrice();
+    }
+
+    function updateModalCalculatedPrice() {
+      if (!activeModalItem) return;
+      const variantPrice = activeModalItem.variants[selectedVariantIndex].price;
+      const extrasSum = selectedExtras.reduce((acc, e) => acc + e.price, 0);
+      const unitTotal = variantPrice + extrasSum;
+      const finalPrice = unitTotal * modalQuantity;
+      document.getElementById("modal-item-price").textContent = `$${finalPrice}`;
+    }
+
+    function closeItemModal() {
+      document.getElementById("item-modal").classList.add("hidden");
+      activeModalItem = null;
+    }
+
+    function confirmAddItemFromModal() {
+      if (!activeModalItem) return;
+
+      const chosenVariant = activeModalItem.variants[selectedVariantIndex];
+      const extrasSum = selectedExtras.reduce((acc, e) => acc + e.price, 0);
+      const unitPrice = chosenVariant.price + extrasSum;
+      const note = document.getElementById("modal-item-note").value.trim();
+
+      const detailsParts = [];
+      if (activeModalItem.variants.length > 1) {
+        detailsParts.push(chosenVariant.name.replace(/\s*\(\$[0-9,]+\)/, ""));
+      }
+      if (selectedSecondaryOption) {
+        detailsParts.push(`Salsa/Proteína: ${selectedSecondaryOption}`);
+      }
+      if (selectedExtras.length > 0) {
+        detailsParts.push(`Extras: ${selectedExtras.map(e => e.name).join(", ")}`);
+      }
+      if (note) {
+        detailsParts.push(`Nota: ${note}`);
+      }
+
+      const cartItem = {
+        cartId: Date.now() + Math.random().toString(36).substring(2, 6),
+        itemId: activeModalItem.id,
+        name: activeModalItem.name,
+        details: detailsParts.join(" | "),
+        unitPrice: unitPrice,
+        quantity: modalQuantity
+      };
+
+      cart.push(cartItem);
+      const addedName = activeModalItem.name;
+      const addedQty = modalQuantity;
+      closeItemModal();
+      updateCartUI(true);
+      showToast(`¡${addedQty}x ${addedName} agregado a tu pedido!`);
+    }
+
+    // 5. ARMADOR DE LA CHAROLA DE 5 ROLLOS SURTIDOS (10% DESCUENTO AUTOMÁTICO)
+    function openCharolaBuilder() {
+      const container = document.getElementById("charola-selectors-container");
+      const defaultIndices = [2, 3, 5, 8, 13]; // Avocado, Monkey, Dragon, Crispy, Spicy Mexican
+
+      container.innerHTML = [1, 2, 3, 4, 5].map((num, idx) => `
+        <div class="bg-white p-3.5 rounded-2xl border border-bocatta-sand flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <label class="text-xs font-bold text-bocatta-wine flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-bocatta-red text-white flex items-center justify-center text-xs">${num}</span>
+            Rollo #${num}:
+          </label>
+          <select id="charola-roll-${num}" onchange="updateCharolaCalculation()" class="flex-1 sm:max-w-xs px-3 py-2 rounded-xl bg-bocatta-cream border border-bocatta-sand text-xs font-semibold text-bocatta-wine focus:outline-none focus:border-bocatta-red">
+            ${ALL_ROLLS_FOR_PLATTER.map((r, rIdx) => `
+              <option value="${rIdx}" ${rIdx === defaultIndices[idx] ? "selected" : ""}>
+                ${r.name} — $${r.price}
+              </option>
+            `).join("")}
+          </select>
+        </div>
+      `).join("");
+
+      updateCharolaCalculation();
+      document.getElementById("charola-modal").classList.remove("hidden");
+    }
+
+    function updateCharolaCalculation() {
+      let sum = 0;
+      for (let i = 1; i <= 5; i++) {
+        const sel = document.getElementById(`charola-roll-${i}`);
+        if (sel) {
+          const r = ALL_ROLLS_FOR_PLATTER[parseInt(sel.value, 10)];
+          if (r) sum += r.price;
+        }
+      }
+      const discount = Math.round(sum * 0.10);
+      const finalTotal = sum - discount;
+
+      document.getElementById("charola-regular-sum").textContent = `$${sum}`;
+      document.getElementById("charola-discount-amount").textContent = `$${discount}`;
+      document.getElementById("charola-final-price").textContent = `$${finalTotal}`;
+    }
+
+    function closeCharolaBuilder() {
+      document.getElementById("charola-modal").classList.add("hidden");
+    }
+
+    function addCharolaToCart() {
+      const chosenNames = [];
+      let sum = 0;
+      for (let i = 1; i <= 5; i++) {
+        const sel = document.getElementById(`charola-roll-${i}`);
+        const r = ALL_ROLLS_FOR_PLATTER[parseInt(sel.value, 10)];
+        chosenNames.push(r.name);
+        sum += r.price;
+      }
+      const discount = Math.round(sum * 0.10);
+      const finalPrice = sum - discount;
+
+      cart.push({
+        cartId: Date.now() + "-charola",
+        name: "Charola de 5 Rollos Surtidos (-10% Desc.)",
+        details: `Rollos: ${chosenNames.join(", ")} (Normal $${sum}, Ahorro -$${discount})`,
+        unitPrice: finalPrice,
+        quantity: 1
+      });
+
+      closeCharolaBuilder();
+      updateCartUI();
+      toggleCartDrawer(true);
+      showToast("¡Charola de 5 Rollos con 10% de descuento agregada!");
+    }
+
+    // 6. CARRITO DE COMPRAS Y GENERADOR DE COMANDA WHATSAPP
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById("cart-drawer");
+      if (open) {
+        drawer.classList.remove("hidden");
+        updateCartUI();
+      } else {
+        drawer.classList.add("hidden");
+      }
+    }
+
+    function changeCartItemQty(cartId, delta) {
+      const item = cart.find(c => c.cartId === cartId);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(c => c.cartId !== cartId);
+      }
+      updateCartUI();
+    }
+
+    function setOrderModality(mod) {
+      orderModality = mod;
+      const btnDom = document.getElementById("mod-domicilio");
+      const btnPick = document.getElementById("mod-pickup");
+      const btnMesa = document.getElementById("mod-mesa");
+      const addrGroup = document.getElementById("order-address-group");
+
+      [btnDom, btnPick, btnMesa].forEach(b => {
+        b.className = "py-2 px-2 rounded-lg text-bocatta-wine hover:bg-white/50 transition cursor-pointer";
+      });
+
+      if (mod === "Pedido a Domicilio") {
+        btnDom.className = "py-2 px-2 rounded-lg bg-bocatta-red text-white shadow transition cursor-pointer";
+        addrGroup.classList.remove("hidden");
+      } else if (mod === "Pasar a Recoger (Pick-up)") {
+        btnPick.className = "py-2 px-2 rounded-lg bg-bocatta-red text-white shadow transition cursor-pointer";
+        addrGroup.classList.add("hidden");
+      } else {
+        btnMesa.className = "py-2 px-2 rounded-lg bg-bocatta-red text-white shadow transition cursor-pointer";
+        addrGroup.classList.add("hidden");
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI(animateBounce = false) {
+      const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+      const totalCost = cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+
+      // Actualizar botón del Header y barra inferior flotante
+      const headerCount = document.getElementById("header-cart-count");
+      const headerTotal = document.getElementById("header-cart-total");
+      const headerCartBtn = document.getElementById("header-cart-btn");
+      if (headerCount) headerCount.textContent = totalItems;
+      if (headerTotal) headerTotal.textContent = `$${totalCost}`;
+
+      document.getElementById("floating-cart-count").textContent = totalItems;
+      document.getElementById("floating-cart-total").textContent = `$${totalCost}`;
+      document.getElementById("cart-drawer-total").textContent = `$${totalCost}`;
+
+      const floatingBar = document.getElementById("floating-cart-bar");
+      const floatingBtn = document.getElementById("floatingCartBtn");
+      const emptyState = document.getElementById("cart-empty-state");
+      const checkoutForm = document.getElementById("cart-checkout-form");
+      const cartFooter = document.getElementById("cart-footer");
+      const listContainer = document.getElementById("cart-items-list");
+
+      if (animateBounce) {
+        if (floatingBtn) {
+          floatingBtn.classList.remove("animate-cart-bounce");
+          void floatingBtn.offsetWidth;
+          floatingBtn.classList.add("animate-cart-bounce");
+        }
+        if (headerCartBtn) {
+          headerCartBtn.classList.remove("animate-cart-bounce");
+          void headerCartBtn.offsetWidth;
+          headerCartBtn.classList.add("animate-cart-bounce");
+        }
+      }
+
+      if (cart.length === 0) {
+        floatingBar.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+        checkoutForm.classList.add("hidden");
+        cartFooter.classList.add("hidden");
+        listContainer.innerHTML = "";
+        return;
+      }
+
+      floatingBar.classList.remove("hidden");
+      emptyState.classList.add("hidden");
+      checkoutForm.classList.remove("hidden");
+      cartFooter.classList.remove("hidden");
+
+      // Mostrar/ocultar campo de efectivo
+      const paymentMethod = document.getElementById("order-payment").value;
+      const cashGroup = document.getElementById("order-cash-group");
+      if (paymentMethod === "Efectivo") {
+        cashGroup.classList.remove("hidden");
+      } else {
+        cashGroup.classList.add("hidden");
+      }
+
+      // Renderizar lista de platillos en el carrito
+      listContainer.innerHTML = cart.map(item => `
+        <div class="bg-white p-3.5 rounded-2xl border border-bocatta-sand flex items-start justify-between gap-3 shadow-2xs">
+          <div class="space-y-0.5 flex-1">
+            <h5 class="font-bold text-xs text-bocatta-wine">${item.name}</h5>
+            ${item.details ? `<p class="text-[11px] text-bocatta-wine/70 leading-snug">${item.details}</p>` : ""}
+            <span class="text-xs font-serif font-bold text-bocatta-red block pt-1">$${item.unitPrice * item.quantity}</span>
+          </div>
+          <div class="flex items-center border border-bocatta-sand rounded-xl bg-bocatta-cream">
+            <button onclick="changeCartItemQty('${item.cartId}', -1)" class="w-7 h-7 text-bocatta-wine hover:text-bocatta-red font-bold text-xs">-</button>
+            <span class="w-6 text-center font-bold text-xs text-bocatta-wine">${item.quantity}</span>
+            <button onclick="changeCartItemQty('${item.cartId}', 1)" class="w-7 h-7 text-bocatta-wine hover:text-bocatta-red font-bold text-xs">+</button>
+          </div>
+        </div>
+      `).join("");
+
+      // Actualizar vista previa del ticket de WhatsApp
+      const previewEl = document.getElementById("whatsapp-order-preview");
+      if (previewEl) {
+        previewEl.textContent = buildOrderWhatsAppText();
+      }
+    }
+
+    // GENERADOR DE TICKET DE WHATSAPP (COMO EN EL PRIMER PILOTO)
+    function buildOrderWhatsAppText() {
+      const name = document.getElementById("order-name").value.trim() || "[Tu Nombre]";
+      const phone = document.getElementById("order-phone") ? (document.getElementById("order-phone").value.trim() || "[Teléfono]") : "[Teléfono]";
+      const address = document.getElementById("order-address").value.trim() || "[Dirección en Chilapa]";
+      const payment = document.getElementById("order-payment").value;
+      const cashAmount = document.getElementById("order-cash-amount").value.trim();
+      const generalNotes = document.getElementById("order-general-notes") ? document.getElementById("order-general-notes").value.trim() : "";
+      const totalCost = cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+
+      let lines = [
+        " *¡Hola Bōcatta Food Spot!* Quiero realizar un pedido:",
+        "",
+        ` *Modalidad:* ${orderModality}`,
+        ` *Cliente:* ${name}`,
+        ` *Contacto:* ${phone}`,
+        "────────────────────",
+        " *DETALLE DEL PEDIDO:*"
+      ];
+
+      cart.forEach(item => {
+        lines.push(`• *${item.quantity}x ${item.name}* — $${item.unitPrice * item.quantity}`);
+        if (item.details) {
+          lines.push(`   ↳ _${item.details}_`);
+        }
+      });
+
+      lines.push("────────────────────");
+      lines.push(` *TOTAL A PAGAR: $${totalCost} MXN*`);
+      lines.push(`*Método de pago:* ${payment}${payment === "Efectivo" && cashAmount ? ` (Paga con: ${cashAmount})` : ""}`);
+
+      if (orderModality === "Pedido a Domicilio") {
+        lines.push(` *Dirección de entrega:* ${address}`);
+      } else if (orderModality === "Pasar a Recoger (Pick-up)") {
+        lines.push(" *Recoger en:* Av. Insurgentes 400A, Centro, Chilapa.");
+      } else {
+        lines.push(" *Para consumo en el local.*");
+      }
+
+      if (generalNotes) {
+        lines.push(` *Notas de cocina:* ${generalNotes}`);
+      }
+
+      return lines.join("\n");
+    }
+
+    function sendOrderViaWhatsApp() {
+      const nameInput = document.getElementById("order-name");
+      const addressInput = document.getElementById("order-address");
+
+      if (!nameInput.value.trim()) {
+        nameInput.focus();
+        showToast("Por favor escribe tu nombre para el pedido", true);
+        return;
+      }
+      if (orderModality === "Pedido a Domicilio" && !addressInput.value.trim()) {
+        addressInput.focus();
+        showToast("Por favor escribe tu dirección de entrega en Chilapa", true);
+        return;
+      }
+
+      const ticket = buildOrderWhatsAppText();
+      const url = `https://wa.me/${BOCATTA_WHATSAPP}?text=${encodeURIComponent(ticket)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function copyOrderTicket() {
+      const text = buildOrderWhatsAppText();
+      copyTextToClipboard(text);
+      showToast("Ticket de pedido copiado al portapapeles");
+    }
+
+    // 7. SISTEMA DE RESERVACIONES Y VALIDACIÓN DE LUNES CERRADO
+    function initDefaultReservationDate() {
+      const dateInput = document.getElementById("res-date");
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Si mañana es lunes (1), avanzar a martes
+      if (tomorrow.getDay() === 1) {
+        tomorrow.setDate(tomorrow.getDate() + 1);
+      }
+      const yyyy = tomorrow.getFullYear();
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+      const dd = String(tomorrow.getDate()).padStart(2, "0");
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+      dateInput.min = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function validateReservationDate() {
+      const dateInput = document.getElementById("res-date");
+      const warning = document.getElementById("monday-warning");
+      if (!dateInput.value) return true;
+
+      const parts = dateInput.value.split("-");
+      const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (selectedDate.getDay() === 1) {
+        warning.classList.remove("hidden");
+        return false;
+      } else {
+        warning.classList.add("hidden");
+        return true;
+      }
+    }
+
+    function buildReservationWhatsAppText() {
+      const name = document.getElementById("res-name").value.trim() || "[Tu Nombre]";
+      const phone = document.getElementById("res-phone").value.trim() || "[Tu Teléfono]";
+      const dateVal = document.getElementById("res-date").value || "[Fecha]";
+      const timeVal = document.getElementById("res-time").value;
+      const guests = document.getElementById("res-guests").value;
+      const occasion = document.getElementById("res-occasion").value;
+      const notes = document.getElementById("res-notes").value.trim();
+
+      const lines = [
+        " *¡Hola Bōcatta Food Spot!* Solicito una reservación de mesa:",
+        "",
+        ` *Nombre:* ${name}`,
+        ` *Teléfono:* ${phone}`,
+        ` *Fecha:* ${dateVal}`,
+        ` *Hora:* ${timeVal}`,
+        ` *Personas:* ${guests}`,
+        ` *Ocasión:* ${occasion}`
+      ];
+
+      if (notes) {
+        lines.push(` *Notas especiales:* ${notes}`);
+      }
+      lines.push("");
+      lines.push(" _Av. Insurgentes 400A, Centro, Chilapa, Gro._");
+      return lines.join("\n");
+    }
+
+    function updateReservationPreview() {
+      const preview = document.getElementById("res-preview-box");
+      if (preview) {
+        preview.textContent = buildReservationWhatsAppText();
+      }
+    }
+
+    function handleReservationSubmit(e) {
+      e.preventDefault();
+      if (!validateReservationDate()) {
+        showToast("Recuerda que los lunes Bōcatta permanece cerrado. Elige de Martes a Domingo.", true);
+        return;
+      }
+      const msg = buildReservationWhatsAppText();
+      const url = `https://wa.me/${BOCATTA_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function copyReservationText() {
+      const msg = buildReservationWhatsAppText();
+      copyTextToClipboard(msg);
+      showToast("Solicitud de reservación copiada al portapapeles");
+    }
+
+    // UTILIDADES (Portapapeles compatible con iFrame y Notificación Toast)
+    function copyTextToClipboard(text) {
+      const tempInput = document.createElement("textarea");
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+    }
+
+    let toastTimeout = null;
+    function showToast(message, isWarning = false) {
+      const toast = document.getElementById("toast-notification");
+      const icon = document.getElementById("toast-icon");
+      const msg = document.getElementById("toast-message");
+
+      msg.textContent = message;
+      icon.className = isWarning
+        ? "fa-solid fa-triangle-exclamation text-amber-400 text-lg"
+        : "fa-solid fa-circle-check text-emerald-400 text-lg";
+
+      toast.classList.remove("hidden");
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
