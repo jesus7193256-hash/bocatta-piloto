@@ -4,6 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bōcatta Food Spot | Menú Digital y Reservaciones - Chilapa, Gro.</title>
+  <meta name="description" content="Menú digital de Bōcatta Food Spot en Chilapa, Guerrero: sushi, alitas, boneless, café de especialidad, matcha y coctelería. Pide a domicilio o para recoger y reserva tu mesa por WhatsApp." />
+  <meta name="theme-color" content="#C83E31" />
+
+  <!-- Favicon (SVG integrado, no requiere archivo externo) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23581818' stroke='%23C83E31' stroke-width='4'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='34' font-weight='bold' text-anchor='middle' fill='%23C83E31'%3EB%3C/text%3E%3C/svg%3E" />
+
+  <!-- Open Graph / Redes sociales (vista previa al compartir por WhatsApp, Facebook, etc.) -->
+  <meta property="og:type" content="restaurant.restaurant" />
+  <meta property="og:locale" content="es_MX" />
+  <meta property="og:site_name" content="Bōcatta Food Spot" />
+  <meta property="og:title" content="Bōcatta Food Spot · Sushi, Alitas y Café de Especialidad en Chilapa" />
+  <meta property="og:description" content="Mira el menú, arma tu charola de 5 rollos con 10% de descuento, pide por WhatsApp o reserva tu mesa. Mar a Dom, 5:30 a 10:00 PM." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Bōcatta Food Spot · Chilapa, Gro." />
+  <meta name="twitter:description" content="Sushi, alitas, café de especialidad y coctelería. Pide por WhatsApp o reserva tu mesa." />
+  <!-- PENDIENTE: agregar <meta property="og:image" content="URL_ABSOLUTA_DE_UNA_FOTO_1200x630.jpg"> y <meta property="og:url"> cuando el sitio tenga dominio final -->
+
+  <!-- Datos estructurados para Google (Restaurante local) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Bōcatta Food Spot",
+    "description": "Sushi, alitas, boneless, café de especialidad, matcha y coctelería en Chilapa de Álvarez, Guerrero.",
+    "servesCuisine": ["Sushi", "Japonesa", "Alitas", "Café de especialidad"],
+    "telephone": "+527561159334",
+    "priceRange": "$$",
+    "acceptsReservations": true,
+    "sameAs": ["https://www.instagram.com/bocatta.ch"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Av. Insurgentes 400A, Col. Centro",
+      "addressLocality": "Chilapa de Álvarez",
+      "addressRegion": "Guerrero",
+      "addressCountry": "MX"
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "17:30",
+        "closes": "22:00"
+      }
+    ]
+  }
+  </script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Playfair Display (for the Bōcatta serif aesthetic) & Plus Jakarta Sans (clean UI) -->
@@ -72,32 +118,19 @@
     .animate-cart-bounce {
       animation: pulse-Subtle 0.35s ease-in-out;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.22s ease-out;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-bocatta-red selection:text-white">
 
-  <!-- TOP PILOT SIMULATION BAR (For testing & client demo) -->
-  <div class="bg-bocatta-wineDark text-bocatta-cream text-xs py-2 px-4 border-b border-bocatta-wine/60">
-    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-bocatta-red text-white">
-          <i class="fa-solid fa-bolt mr-1"></i> PILOTO MVP
-        </span>
-        <span class="opacity-90 hidden sm:inline">Demostración interactiva de eficiencia operativa para <strong>@bocatta.ch</strong></span>
-      </div>
-      <div class="flex items-center gap-3 ml-auto">
-        <label for="sim-status-select" class="text-[11px] opacity-80">Estado del local:</label>
-        <select id="sim-status-select" onchange="updateStoreStatus()" class="bg-bocatta-wine text-bocatta-cream border border-bocatta-sand/30 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-bocatta-red cursor-pointer">
-          <option value="auto">Automático (Hora real)</option>
-          <option value="open">Simular: Abierto ahora</option>
-          <option value="closed">Simular: Cerrado</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
   <!-- STICKY NAVIGATION HEADER -->
-  <header class="sticky top-0 z-30 bg-bocatta-cream/95 backdrop-blur-md border-b border-bocatta-sand shadow-xs">
+  <header class="sticky top-0 z-30 bg-bocatta-cream/95 backdrop-blur-md border-b border-bocatta-sand shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <!-- Brand Logo -->
       <a href="#" class="flex items-center gap-3 group">
@@ -222,17 +255,17 @@
               <!-- Visual Sushi Showcase (Como en el primer piloto) -->
               <div class="grid grid-cols-3 gap-2.5 pt-1">
                 <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
-                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xl mb-1.5 text-bocatta-red"><i class="fa-solid fa-star" aria-hidden="true"></i></div>
                   <div class="text-xs font-bold text-bocatta-cream">Monkey Roll</div>
                   <div class="text-[10px] text-bocatta-sand">Plátano &amp; Anguila</div>
                 </div>
                 <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
-                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xl mb-1.5 text-bocatta-red"><i class="fa-solid fa-leaf" aria-hidden="true"></i></div>
                   <div class="text-xs font-bold text-bocatta-cream">Avocado Roll</div>
                   <div class="text-[10px] text-bocatta-sand">Camarón Emp.</div>
                 </div>
                 <div class="bg-bocatta-wineDark/80 p-3 rounded-2xl border border-white/10 text-center">
-                  <div class="text-2xl mb-1"></div>
+                  <div class="text-xl mb-1.5 text-bocatta-red"><i class="fa-solid fa-pepper-hot" aria-hidden="true"></i></div>
                   <div class="text-xs font-bold text-bocatta-cream">Spicy Mexican</div>
                   <div class="text-[10px] text-bocatta-sand">Arrachera &amp; Tocino</div>
                 </div>
@@ -310,13 +343,19 @@
 
     <!-- Empty Search State -->
     <div id="empty-search-state" class="hidden text-center py-14 bg-bocatta-creamLight rounded-3xl border-2 border-dashed border-bocatta-sand my-4">
-      <div class="text-4xl mb-3"></div>
+      <div class="text-4xl mb-3 text-bocatta-red/70"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></div>
       <h3 class="font-serif text-xl font-bold text-bocatta-wine mb-1">No encontramos platillos con esa búsqueda</h3>
       <p class="text-sm text-bocatta-wine/70 mb-4">Intenta buscar otro ingrediente como "camarón", "mango", "matcha" o "alitas".</p>
       <button onclick="clearSearch()" class="bg-bocatta-red text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-bocatta-redDark transition">
         Ver todo el menú
       </button>
     </div>
+
+    <!-- Leyenda legal obligatoria para bebidas alcohólicas (se muestra solo si hay bebidas con alcohol en pantalla) -->
+    <p id="alcohol-legal-notice" class="hidden mt-6 text-center text-[11px] font-semibold uppercase tracking-wider text-bocatta-wine/70">
+      <i class="fa-solid fa-circle-exclamation text-bocatta-red mr-1" aria-hidden="true"></i>
+      Prohibida la venta de bebidas alcohólicas a menores de edad · Evita el exceso
+    </p>
 
   </main>
 
@@ -341,7 +380,7 @@
           <div class="space-y-3 pt-2">
             <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
-                
+                <i class="fa-solid fa-palette" aria-hidden="true"></i>
               </div>
               <div>
                 <h3 class="font-bold text-sm text-bocatta-cream">Día Creativo / Paintings</h3>
@@ -351,7 +390,7 @@
 
             <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
-                
+                <i class="fa-solid fa-cake-candles" aria-hidden="true"></i>
               </div>
               <div>
                 <h3 class="font-bold text-sm text-bocatta-cream">Cumpleaños &amp; Festejos</h3>
@@ -361,7 +400,7 @@
 
             <div class="bg-bocatta-wineDark/90 p-4 rounded-2xl border border-white/10 flex items-start gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-bocatta-red/20 border border-bocatta-red text-bocatta-sand flex items-center justify-center text-lg shrink-0">
-                
+                <i class="fa-solid fa-champagne-glasses" aria-hidden="true"></i>
               </div>
               <div>
                 <h3 class="font-bold text-sm text-bocatta-cream">Cita Especial / Ustedes 2.0</h3>
@@ -434,9 +473,9 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-bocatta-wine mb-1">Ocasión / Experiencia</label>
                 <select id="res-occasion" onchange="updateReservationPreview()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-sm focus:outline-none focus:border-bocatta-red">
                   <option value="Cena casual">Cena casual</option>
-                  <option value="Cumpleaños ">Cumpleaños </option>
-                  <option value="Día Creativo / Paintings ">Día Creativo / Paintings </option>
-                  <option value="Cita Especial (Ustedes 2.0 )">Cita Especial (Ustedes 2.0 🥂)</option>
+                  <option value="Cumpleaños">Cumpleaños</option>
+                  <option value="Día Creativo / Paintings">Día Creativo / Paintings</option>
+                  <option value="Cita Especial (Ustedes 2.0)">Cita Especial (Ustedes 2.0 🥂)</option>
                   <option value="Reunión grupal">Reunión grupal</option>
                 </select>
               </div>
@@ -535,9 +574,29 @@
 
       </div>
 
-      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-bocatta-sand/60 gap-2">
-        <p>© 2026 Bōcatta Food Spot. Todos los derechos reservados.</p>
-        <p>Prototipo Piloto v1.0 — Menú Digital &amp; Automatización de Pedidos por WhatsApp</p>
+      <div class="pt-6 space-y-4 text-xs text-bocatta-sand/60">
+        <p class="text-center text-[11px] font-semibold text-bocatta-sand/80 uppercase tracking-wider">
+          Prohibida la venta de bebidas alcohólicas a menores de edad · Evita el exceso
+        </p>
+
+        <details class="bg-white/5 rounded-xl border border-white/10 px-4 py-3 group">
+          <summary class="cursor-pointer font-semibold text-bocatta-sand/80 hover:text-bocatta-cream list-none flex items-center justify-between">
+            <span><i class="fa-solid fa-shield-halved mr-1.5" aria-hidden="true"></i> Aviso de Privacidad</span>
+            <i class="fa-solid fa-chevron-down text-[10px] transition group-open:rotate-180" aria-hidden="true"></i>
+          </summary>
+          <div class="pt-3 space-y-2 leading-relaxed text-bocatta-sand/70">
+            <p><strong>Bōcatta Food Spot</strong>, con domicilio en Av. Insurgentes 400A, Col. Centro, Chilapa de Álvarez, Guerrero, es responsable del uso de tus datos personales.</p>
+            <p><strong>Datos que solicitamos:</strong> nombre, teléfono y, en pedidos a domicilio, dirección de entrega.</p>
+            <p><strong>Finalidad:</strong> únicamente preparar y entregar tu pedido o confirmar tu reservación. No vendemos ni compartimos tus datos con terceros.</p>
+            <p><strong>Almacenamiento:</strong> este sitio no guarda tus datos en ningún servidor; la información se envía directamente a nuestro WhatsApp cuando tú decides mandar el mensaje.</p>
+            <p><strong>Derechos ARCO:</strong> puedes solicitar el acceso, rectificación, cancelación u oposición al uso de tus datos escribiendo al WhatsApp 756 115 9334.</p>
+          </div>
+        </details>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>© 2026 Bōcatta Food Spot. Todos los derechos reservados.</p>
+          <p>Menú Digital &amp; Pedidos por WhatsApp</p>
+        </div>
       </div>
     </div>
   </footer>
@@ -567,7 +626,7 @@
   </div>
 
   <!-- ITEM CUSTOMIZATION MODAL (Variants, Sauces, Coffee Extras) -->
-  <div id="item-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="item-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-bocatta-cream w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-sand overflow-hidden max-h-[90vh] flex flex-col animate-fadeIn">
       <!-- Modal Header -->
       <div class="bg-bocatta-wine text-bocatta-cream p-5 flex items-start justify-between gap-4">
@@ -644,7 +703,7 @@
   </div>
 
   <!-- 5-ROLL PLATTER BUILDER MODAL (CHAROLA DE 5 ROLLOS SURTIDOS -10%) -->
-  <div id="charola-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="charola-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-bocatta-cream w-full max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-red overflow-hidden max-h-[92vh] flex flex-col">
       <div class="bg-bocatta-red text-white p-5 flex items-start justify-between gap-4">
         <div>
@@ -683,7 +742,7 @@
   <!-- SLIDE-OVER CART DRAWER & WHATSAPP TICKET GENERATOR -->
   <div id="cart-drawer" class="fixed inset-0 z-50 hidden">
     <!-- Backdrop -->
-    <div onclick="toggleCartDrawer(false)" class="absolute inset-0 bg-black/60 backdrop-blur-xs"></div>
+    <div onclick="toggleCartDrawer(false)" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
     <!-- Drawer Panel -->
     <div class="absolute inset-y-0 right-0 w-full max-w-md bg-bocatta-cream shadow-2xl border-l-2 border-bocatta-sand flex flex-col">
@@ -724,6 +783,12 @@
             <i class="fa-solid fa-motorcycle text-bocatta-red"></i> Datos de Entrega y Pago
           </h4>
 
+          <!-- Aviso cuando el local está cerrado (se activa por JS) -->
+          <div id="cart-closed-notice" class="hidden bg-amber-50 border border-amber-300 text-amber-900 rounded-xl p-3 text-[11px] leading-relaxed flex items-start gap-2">
+            <i class="fa-regular fa-clock mt-0.5" aria-hidden="true"></i>
+            <span id="cart-closed-notice-text"></span>
+          </div>
+
           <!-- Delivery Modality Tabs -->
           <div class="grid grid-cols-3 gap-1.5 bg-bocatta-sand/50 p-1 rounded-xl text-xs font-bold">
             <button type="button" onclick="setOrderModality('Pedido a Domicilio')" id="mod-domicilio" class="py-2 px-2 rounded-lg bg-bocatta-red text-white shadow transition">
@@ -750,8 +815,12 @@
             </div>
 
             <div id="order-address-group">
-              <label class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Dirección completa y Referencias (Chilapa) *</label>
+              <label for="order-address" class="block text-[11px] font-bold uppercase text-bocatta-wine mb-1">Dirección completa y Referencias (Chilapa) *</label>
               <textarea id="order-address" rows="2" placeholder="Calle, número, barrio/colonia y referencias de fachada..." oninput="updateCartUI()" class="w-full px-3 py-2 rounded-xl bg-white border border-bocatta-sand text-xs focus:outline-none focus:border-bocatta-red"></textarea>
+              <p id="delivery-fee-note" class="text-[11px] text-bocatta-wine/70 mt-1.5 flex items-start gap-1.5">
+                <i class="fa-solid fa-motorcycle text-bocatta-red mt-0.5" aria-hidden="true"></i>
+                <span id="delivery-fee-note-text"></span>
+              </p>
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
@@ -1099,6 +1168,7 @@
         priceDisplay: "$145",
         variants: [{ name: "Bōcatta ball ($145)", price: 145 }],
         secondaryLabel: "Elige la proteína obligatoria de tu Bōcatta ball *",
+        secondaryKey: "Proteína",
         secondaryOptions: ["Camarón empanizado", "Salmón", "Arrachera"]
       },
       {
@@ -1166,6 +1236,7 @@
         priceDisplay: "$150",
         variants: [{ name: "Orden 6 piezas ($150)", price: 150 }],
         secondaryLabel: "Elige tu salsa obligatoria *",
+        secondaryKey: "Salsa",
         secondaryOptions: SAUCES_LIST
       },
       {
@@ -1180,6 +1251,7 @@
         priceDisplay: "$120",
         variants: [{ name: "Orden 300gr ($120)", price: 120 }],
         secondaryLabel: "Elige tu salsa obligatoria *",
+        secondaryKey: "Salsa",
         secondaryOptions: SAUCES_LIST
       },
 
@@ -1417,6 +1489,7 @@
         basePrice: 30,
         priceDisplay: "$30 - $42",
         allowCoffeeExtras: true,
+        allowedExtras: ["escarchado"],
         variantsLabel: "Elige tu cerveza *",
         variants: [
           { name: "Corona ($30)", price: 30 },
@@ -1497,11 +1570,123 @@
       }
     ];
 
+    // ================= UTILIDADES GENERALES =================
+    const CHILAPA_TIMEZONE = "America/Mexico_City";
+
+    // Fecha/hora actual en Chilapa (independiente de la zona horaria del visitante)
+    function getChilapaNow() {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: CHILAPA_TIMEZONE,
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", weekday: "short", hourCycle: "h23"
+      }).formatToParts(new Date());
+      const get = type => parts.find(p => p.type === type).value;
+      const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      return {
+        year: parseInt(get("year"), 10),
+        month: parseInt(get("month"), 10),
+        day: parseInt(get("day"), 10),
+        hour: parseInt(get("hour"), 10) % 24,
+        minute: parseInt(get("minute"), 10),
+        weekday: weekdayMap[get("weekday")]
+      };
+    }
+
+    // Escapa texto antes de insertarlo con innerHTML (evita inyección de HTML/JS)
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // Normaliza texto para búsquedas: minúsculas y sin acentos ("Camarón" -> "camaron")
+    function normalizeText(str) {
+      return String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // Valida que un teléfono tenga 10 dígitos (acepta espacios, guiones y prefijo +52)
+    function isValidPhone(str) {
+      let digits = String(str).replace(/\D/g, "");
+      if (digits.length === 12 && digits.startsWith("52")) digits = digits.slice(2);
+      return digits.length === 10;
+    }
+
     // Estado de la Aplicación
     let currentCategory = "todos";
     let searchQuery = "";
     let cart = [];
     let orderModality = "Pedido a Domicilio";
+    let storeIsOpen = true; // Lo actualiza updateStoreStatus()
+
+    // ===== CONFIGURACIÓN DE ENVÍO (editable por el dueño) =====
+    // Cuando se definan, escribir aquí el costo y las zonas. Ej: "Envío $25 dentro del centro de Chilapa."
+    const DELIVERY_NOTE = "El costo de envío y la cobertura se confirman por WhatsApp según tu zona.";
+
+    // ===== PERSISTENCIA (localStorage) =====
+    const STORAGE_KEY = "bocatta_pedido_v1";
+    const STORAGE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // El pedido guardado caduca a las 24 h
+    const PERSISTED_FIELDS = ["order-name", "order-phone", "order-address", "order-payment", "order-cash-amount", "order-general-notes"];
+
+    function saveOrderState() {
+      try {
+        const fields = {};
+        PERSISTED_FIELDS.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) fields[id] = el.value;
+        });
+        if (cart.length === 0 && !Object.values(fields).some(v => v && v.trim())) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ savedAt: Date.now(), cart, orderModality, fields }));
+      } catch (e) { /* localStorage no disponible (modo privado, etc.): se ignora */ }
+    }
+
+    function loadOrderState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || Date.now() - data.savedAt > STORAGE_MAX_AGE_MS) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+        // Validar cada partida del carrito para no confiar en datos manipulados
+        if (Array.isArray(data.cart)) {
+          cart = data.cart.filter(c =>
+            c && typeof c.cartId === "string" && typeof c.name === "string" &&
+            Number.isFinite(c.unitPrice) && c.unitPrice >= 0 &&
+            Number.isInteger(c.quantity) && c.quantity > 0 && c.quantity <= 99
+          ).map(c => ({ ...c, details: typeof c.details === "string" ? c.details : "" }));
+        }
+        if (data.fields) {
+          PERSISTED_FIELDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && typeof data.fields[id] === "string") el.value = data.fields[id];
+          });
+        }
+        const validModalities = ["Pedido a Domicilio", "Pasar a Recoger (Pick-up)", "Consumo en el Local (Pre-orden)"];
+        if (validModalities.includes(data.orderModality)) {
+          setOrderModality(data.orderModality);
+        }
+      } catch (e) { /* datos corruptos: se ignoran */ }
+    }
+
+    // Aviso en el carrito cuando el local está cerrado
+    function updateClosedNotice() {
+      const notice = document.getElementById("cart-closed-notice");
+      const noticeText = document.getElementById("cart-closed-notice-text");
+      if (!notice || !noticeText) return;
+      if (storeIsOpen) {
+        notice.classList.add("hidden");
+      } else {
+        noticeText.textContent = "Estamos cerrados en este momento (horario: Martes a Domingo, 5:30 PM a 10:00 PM). Puedes dejar tu pedido listo y te lo confirmamos por WhatsApp cuando abramos.";
+        notice.classList.remove("hidden");
+      }
+    }
 
     // Estado del Modal de Personalización
     let activeModalItem = null;
@@ -1513,11 +1698,15 @@
     // Inicializar al cargar la página
     window.addEventListener("DOMContentLoaded", () => {
       updateStoreStatus();
+      setInterval(updateStoreStatus, 60 * 1000); // Refrescar el estado cada minuto
       renderCategoryTabs();
       renderMenuGrid();
       setupMenuGridDelegation();
       initDefaultReservationDate();
       updateReservationPreview();
+      const deliveryNoteEl = document.getElementById("delivery-fee-note-text");
+      if (deliveryNoteEl) deliveryNoteEl.textContent = DELIVERY_NOTE;
+      loadOrderState();
       updateCartUI();
     });
 
@@ -1584,32 +1773,33 @@
       showToast(`¡1x ${item.name} ($${defaultVariant.price}) agregado al pedido!`);
     }
 
-    // 1. VERIFICADOR DE HORARIO EN TIEMPO REAL (Mar-Dom 5:30 PM a 10:00 PM)
+    // 1. VERIFICADOR DE HORARIO EN TIEMPO REAL (Mar-Dom 5:30 PM a 10:00 PM, hora de Chilapa)
+    // Para pruebas se puede forzar el estado con ?estado=abierto o ?estado=cerrado en la URL.
     function updateStoreStatus() {
-      const mode = document.getElementById("sim-status-select").value;
+      const mode = new URLSearchParams(window.location.search).get("estado");
       const dot = document.getElementById("status-dot");
       const text = document.getElementById("status-text");
 
       let isOpen = false;
       let statusLabel = "";
 
-      if (mode === "open") {
+      if (mode === "abierto") {
         isOpen = true;
         statusLabel = "Abierto ahora · Servicio hasta las 10:00 PM (Simulado)";
-      } else if (mode === "closed") {
+      } else if (mode === "cerrado") {
         isOpen = false;
         statusLabel = "Cerrado en este momento · Puedes pre-ordenar o reservar mesa";
       } else {
-        const now = new Date();
-        const day = now.getDay(); // 0 = Domingo, 1 = Lunes, 2 = Martes...
-        const minutesOfDay = now.getHours() * 60 + now.getMinutes();
+        const now = getChilapaNow();
+        const day = now.weekday; // 0 = Domingo, 1 = Lunes, 2 = Martes...
+        const minutesOfDay = now.hour * 60 + now.minute;
         const openMinutes = 17 * 60 + 30; // 5:30 PM = 1050
         const closeMinutes = 22 * 60;     // 10:00 PM = 1320
 
         if (day === 1) {
           isOpen = false;
           statusLabel = "Hoy Lunes cerrado · Abrimos mañana martes de 5:30 PM a 10:00 PM";
-        } else if (minutesOfDay >= openMinutes && minutesOfDay <= closeMinutes) {
+        } else if (minutesOfDay >= openMinutes && minutesOfDay < closeMinutes) {
           isOpen = true;
           statusLabel = "¡Abierto ahora en Chilapa! · Cierra a las 10:00 PM";
         } else if (minutesOfDay < openMinutes) {
@@ -1627,6 +1817,8 @@
         dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
       }
       text.textContent = statusLabel;
+      storeIsOpen = isOpen;
+      updateClosedNotice();
     }
 
     // 2. RENDERIZAR PESTAÑAS DE CATEGORÍAS
@@ -1664,7 +1856,7 @@
     }
 
     function handleSearch(val) {
-      searchQuery = val.trim().toLowerCase();
+      searchQuery = normalizeText(val.trim());
       const clearBtn = document.getElementById("clear-search-btn");
       if (searchQuery.length > 0) {
         clearBtn.classList.remove("hidden");
@@ -1684,16 +1876,21 @@
     function renderMenuGrid() {
       const grid = document.getElementById("menu-grid");
       const emptyState = document.getElementById("empty-search-state");
+      const alcoholNotice = document.getElementById("alcohol-legal-notice");
 
       const filtered = MENU_ITEMS.filter(item => {
         const matchesCat = currentCategory === "todos" || item.category === currentCategory;
         const matchesSearch = !searchQuery || 
-          item.name.toLowerCase().includes(searchQuery) ||
-          item.description.toLowerCase().includes(searchQuery) ||
-          item.categoryLabel.toLowerCase().includes(searchQuery) ||
-          (item.variants && item.variants.some(v => v.name.toLowerCase().includes(searchQuery)));
+          normalizeText(item.name).includes(searchQuery) ||
+          normalizeText(item.description).includes(searchQuery) ||
+          normalizeText(item.categoryLabel).includes(searchQuery) ||
+          (item.variants && item.variants.some(v => normalizeText(v.name).includes(searchQuery)));
         return matchesCat && matchesSearch;
       });
+
+      // Leyenda legal de alcohol visible solo si hay bebidas alcohólicas en pantalla
+      const showsAlcohol = filtered.some(item => item.category === "bar-cocteleria");
+      alcoholNotice.classList.toggle("hidden", !showsAlcohol);
 
       if (filtered.length === 0) {
         grid.innerHTML = "";
@@ -1740,7 +1937,7 @@
                 <button
                   type="button"
                   data-menu-action="charola"
-                  class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition shrink-0 cursor-pointer active:scale-95"
+                  class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition shrink-0 cursor-pointer active:scale-95"
                 >
                   Armar Charola (-10%)
                 </button>
@@ -1753,7 +1950,7 @@
         const isMatchaCard = item.isMatcha === true;
 
         return `
-          <article class="bg-white rounded-2xl p-5 shadow-xs hover:shadow-xl border-2 ${
+          <article class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl border-2 ${
             isMatchaCard
               ? "border-bocatta-matcha/50 hover:border-bocatta-matcha"
               : "border-bocatta-sand/90 hover:border-bocatta-red"
@@ -1824,7 +2021,7 @@
                           isMatchaCard
                             ? "bg-bocatta-matcha hover:bg-bocatta-wine"
                             : "bg-bocatta-red hover:bg-bocatta-redDark"
-                        } text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition cursor-pointer active:scale-95"
+                        } text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition cursor-pointer active:scale-95"
                       >
                         Personalizar
                       </button>
@@ -1843,7 +2040,7 @@
                         type="button"
                         data-menu-action="quick-add"
                         data-item-id="${item.id}"
-                        class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer active:scale-95"
+                        class="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition cursor-pointer active:scale-95"
                       >
                         + Agregar
                       </button>
@@ -1954,7 +2151,7 @@
             onclick="selectSecondaryOptionByIndex(${idx})"
             class="p-2.5 rounded-xl border-2 text-xs text-left cursor-pointer transition flex items-center justify-between ${
               isSelected
-                ? "border-bocatta-red bg-bocatta-red text-white font-bold shadow-xs"
+                ? "border-bocatta-red bg-bocatta-red text-white font-bold shadow-sm"
                 : "border-bocatta-sand bg-white text-bocatta-wine hover:border-bocatta-wine/40"
             }"
           >
@@ -1973,7 +2170,12 @@
 
     function renderCoffeeExtras() {
       const extrasList = document.getElementById("modal-extras-list");
-      extrasList.innerHTML = COFFEE_EXTRAS.map(ex => {
+      // Si el platillo define allowedExtras, solo mostrar esos (ej. cervezas: solo escarchado)
+      const allowed = activeModalItem && activeModalItem.allowedExtras;
+      const availableExtras = allowed
+        ? COFFEE_EXTRAS.filter(ex => ex.id === "sin-extra" || allowed.includes(ex.id))
+        : COFFEE_EXTRAS;
+      extrasList.innerHTML = availableExtras.map(ex => {
         const isChecked = (ex.id === "sin-extra" && selectedExtras.length === 0) || selectedExtras.some(e => e.id === ex.id);
         return `
           <button
@@ -1981,7 +2183,7 @@
             onclick="toggleCoffeeExtra('${ex.id}')"
             class="p-2.5 rounded-xl border-2 text-xs transition flex flex-col items-start justify-between cursor-pointer ${
               isChecked
-                ? "border-bocatta-wine bg-bocatta-wine text-white font-bold shadow-xs"
+                ? "border-bocatta-wine bg-bocatta-wine text-white font-bold shadow-sm"
                 : "border-bocatta-sand bg-white text-bocatta-wine hover:border-bocatta-wine/40"
             }"
           >
@@ -2041,7 +2243,7 @@
         detailsParts.push(chosenVariant.name.replace(/\s*\(\$[0-9,]+\)/, ""));
       }
       if (selectedSecondaryOption) {
-        detailsParts.push(`Salsa/Proteína: ${selectedSecondaryOption}`);
+        detailsParts.push(`${activeModalItem.secondaryKey || "Opción"}: ${selectedSecondaryOption}`);
       }
       if (selectedExtras.length > 0) {
         detailsParts.push(`Extras: ${selectedExtras.map(e => e.name).join(", ")}`);
@@ -2185,6 +2387,7 @@
     }
 
     function updateCartUI(animateBounce = false) {
+      saveOrderState();
       const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
       const totalCost = cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
 
@@ -2244,10 +2447,10 @@
 
       // Renderizar lista de platillos en el carrito
       listContainer.innerHTML = cart.map(item => `
-        <div class="bg-white p-3.5 rounded-2xl border border-bocatta-sand flex items-start justify-between gap-3 shadow-2xs">
+        <div class="bg-white p-3.5 rounded-2xl border border-bocatta-sand flex items-start justify-between gap-3 shadow-sm">
           <div class="space-y-0.5 flex-1">
-            <h5 class="font-bold text-xs text-bocatta-wine">${item.name}</h5>
-            ${item.details ? `<p class="text-[11px] text-bocatta-wine/70 leading-snug">${item.details}</p>` : ""}
+            <h5 class="font-bold text-xs text-bocatta-wine">${escapeHTML(item.name)}</h5>
+            ${item.details ? `<p class="text-[11px] text-bocatta-wine/70 leading-snug">${escapeHTML(item.details)}</p>` : ""}
             <span class="text-xs font-serif font-bold text-bocatta-red block pt-1">$${item.unitPrice * item.quantity}</span>
           </div>
           <div class="flex items-center border border-bocatta-sand rounded-xl bg-bocatta-cream">
@@ -2276,13 +2479,14 @@
       const totalCost = cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
 
       let lines = [
-        " *¡Hola Bōcatta Food Spot!* Quiero realizar un pedido:",
+        "*¡Hola Bōcatta Food Spot!* Quiero realizar un pedido:",
+        ...(storeIsOpen ? [] : ["_(Pedido enviado fuera de horario: por favor confírmenlo cuando abran)_"]),
         "",
-        ` *Modalidad:* ${orderModality}`,
-        ` *Cliente:* ${name}`,
-        ` *Contacto:* ${phone}`,
+        `*Modalidad:* ${orderModality}`,
+        `*Cliente:* ${name}`,
+        `*Contacto:* ${phone}`,
         "────────────────────",
-        " *DETALLE DEL PEDIDO:*"
+        "*DETALLE DEL PEDIDO:*"
       ];
 
       cart.forEach(item => {
@@ -2293,19 +2497,20 @@
       });
 
       lines.push("────────────────────");
-      lines.push(` *TOTAL A PAGAR: $${totalCost} MXN*`);
+      lines.push(`*TOTAL A PAGAR: $${totalCost} MXN*`);
       lines.push(`*Método de pago:* ${payment}${payment === "Efectivo" && cashAmount ? ` (Paga con: ${cashAmount})` : ""}`);
 
       if (orderModality === "Pedido a Domicilio") {
-        lines.push(` *Dirección de entrega:* ${address}`);
+        lines.push(`*Dirección de entrega:* ${address}`);
+        lines.push("*Envío:* por confirmar según mi zona");
       } else if (orderModality === "Pasar a Recoger (Pick-up)") {
-        lines.push(" *Recoger en:* Av. Insurgentes 400A, Centro, Chilapa.");
+        lines.push("*Recoger en:* Av. Insurgentes 400A, Centro, Chilapa.");
       } else {
-        lines.push(" *Para consumo en el local.*");
+        lines.push("*Para consumo en el local.*");
       }
 
       if (generalNotes) {
-        lines.push(` *Notas de cocina:* ${generalNotes}`);
+        lines.push(`*Notas de cocina:* ${generalNotes}`);
       }
 
       return lines.join("\n");
@@ -2313,11 +2518,17 @@
 
     function sendOrderViaWhatsApp() {
       const nameInput = document.getElementById("order-name");
+      const phoneInput = document.getElementById("order-phone");
       const addressInput = document.getElementById("order-address");
 
       if (!nameInput.value.trim()) {
         nameInput.focus();
         showToast("Por favor escribe tu nombre para el pedido", true);
+        return;
+      }
+      if (!isValidPhone(phoneInput.value)) {
+        phoneInput.focus();
+        showToast("Escribe un teléfono válido de 10 dígitos para contactarte", true);
         return;
       }
       if (orderModality === "Pedido a Domicilio" && !addressInput.value.trim()) {
@@ -2340,7 +2551,8 @@
     // 7. SISTEMA DE RESERVACIONES Y VALIDACIÓN DE LUNES CERRADO
     function initDefaultReservationDate() {
       const dateInput = document.getElementById("res-date");
-      const tomorrow = new Date();
+      const today = getChilapaNow();
+      const tomorrow = new Date(today.year, today.month - 1, today.day);
       tomorrow.setDate(tomorrow.getDate() + 1);
       // Si mañana es lunes (1), avanzar a martes
       if (tomorrow.getDay() === 1) {
@@ -2379,21 +2591,21 @@
       const notes = document.getElementById("res-notes").value.trim();
 
       const lines = [
-        " *¡Hola Bōcatta Food Spot!* Solicito una reservación de mesa:",
+        "*¡Hola Bōcatta Food Spot!* Solicito una reservación de mesa:",
         "",
-        ` *Nombre:* ${name}`,
-        ` *Teléfono:* ${phone}`,
-        ` *Fecha:* ${dateVal}`,
-        ` *Hora:* ${timeVal}`,
-        ` *Personas:* ${guests}`,
-        ` *Ocasión:* ${occasion}`
+        `*Nombre:* ${name}`,
+        `*Teléfono:* ${phone}`,
+        `*Fecha:* ${dateVal}`,
+        `*Hora:* ${timeVal}`,
+        `*Personas:* ${guests}`,
+        `*Ocasión:* ${occasion}`
       ];
 
       if (notes) {
-        lines.push(` *Notas especiales:* ${notes}`);
+        lines.push(`*Notas especiales:* ${notes}`);
       }
       lines.push("");
-      lines.push(" _Av. Insurgentes 400A, Centro, Chilapa, Gro._");
+      lines.push("_Av. Insurgentes 400A, Centro, Chilapa, Gro._");
       return lines.join("\n");
     }
 
@@ -2408,6 +2620,12 @@
       e.preventDefault();
       if (!validateReservationDate()) {
         showToast("Recuerda que los lunes Bōcatta permanece cerrado. Elige de Martes a Domingo.", true);
+        return;
+      }
+      const resPhone = document.getElementById("res-phone");
+      if (!isValidPhone(resPhone.value)) {
+        resPhone.focus();
+        showToast("Escribe un teléfono válido de 10 dígitos para confirmar tu reservación", true);
         return;
       }
       const msg = buildReservationWhatsAppText();
