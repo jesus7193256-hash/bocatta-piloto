@@ -1,2 +1,8 @@
 node_modules/
+.next/
+out/
 *.bak
+.env
+.env.*
+!.env.example
+.vercel/
