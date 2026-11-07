@@ -2,7 +2,7 @@ import { AppProvider } from "@/components/AppProvider";
 import { Header, Hero, FloatingCartBar, Toast, Footer } from "@/components/Chrome";
 import { MenuSection } from "@/components/MenuSection";
 import { ReservationSection } from "@/components/ReservationSection";
-import { ItemModal, CharolaModal, CartDrawer } from "@/components/Modals";
+import { ItemModal, CharolaModal, CartDrawer, MyOrdersModal } from "@/components/Modals";
 
 export default function HomePage() {
   return (
@@ -16,6 +16,7 @@ export default function HomePage() {
       <ItemModal />
       <CharolaModal />
       <CartDrawer />
+      <MyOrdersModal />
       <Toast />
     </AppProvider>
   );

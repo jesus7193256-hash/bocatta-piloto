@@ -1,19 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { CATEGORIES, MENU_ITEMS } from "@/lib/menu";
+import { CATEGORIES } from "@/lib/menu";
 import { normalizeText } from "@/lib/utils";
 import { useApp } from "./AppProvider";
 
 export function MenuSection() {
-  const { setActiveItem, setCharolaOpen, addToCart, showToast } = useApp();
+  const { menuItems, setActiveItem, setCharolaOpen, addToCart, showToast } = useApp();
   const [currentCategory, setCurrentCategory] = useState("todos");
   const [searchInput, setSearchInput] = useState("");
 
   const searchQuery = useMemo(() => normalizeText(searchInput.trim()), [searchInput]);
 
   const filteredItems = useMemo(() => {
-    return MENU_ITEMS.filter((item) => {
+    return menuItems.filter((item) => {
       const matchesCat = currentCategory === "todos" || item.category === currentCategory;
       const matchesSearch =
         !searchQuery ||
@@ -23,7 +23,7 @@ export function MenuSection() {
         (item.variants && item.variants.some((v) => normalizeText(v.name).includes(searchQuery)));
       return matchesCat && matchesSearch;
     });
-  }, [currentCategory, searchQuery]);
+  }, [menuItems, currentCategory, searchQuery]);
 
   const showsAlcohol = useMemo(
     () => filteredItems.some((item) => item.category === "bar-cocteleria"),
@@ -33,6 +33,10 @@ export function MenuSection() {
   const showCoffeeBanner = currentCategory === "cafeteria-matcha" || currentCategory === "todos";
 
   const handleQuickAdd = (item) => {
+    if (item.isAvailable === false) {
+      showToast("Este platillo está agotado temporalmente", true);
+      return;
+    }
     const hasMultipleChoices =
       item.variants.length > 1 ||
       (item.secondaryOptions && item.secondaryOptions.length > 0) ||
@@ -57,7 +61,6 @@ export function MenuSection() {
 
   return (
     <main id="menu-section" className="max-w-6xl mx-auto px-4 py-10 flex-1 w-full">
-      {/* Encabezado y buscador */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-bocatta-red">
@@ -94,7 +97,6 @@ export function MenuSection() {
         </div>
       </div>
 
-      {/* Pestañas de categorías */}
       <div className="sticky top-[68px] z-20 bg-bocatta-cream/95 backdrop-blur-sm py-3 -mx-4 px-4 mb-6 border-b border-bocatta-sand">
         <div
           role="tablist"
@@ -124,7 +126,6 @@ export function MenuSection() {
         </div>
       </div>
 
-      {/* Banner de extras de cafetería y matcha */}
       {showCoffeeBanner && (
         <div className="mb-6 bg-bocatta-wine text-bocatta-cream rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md border border-bocatta-red/40">
           <div className="flex items-center gap-3.5">
@@ -153,7 +154,6 @@ export function MenuSection() {
         </div>
       )}
 
-      {/* Cuadrícula de platillos */}
       {filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredItems.map((item) => {
@@ -209,12 +209,15 @@ export function MenuSection() {
               (item.secondaryOptions && item.secondaryOptions.length > 0) ||
               item.allowCoffeeExtras;
             const isMatchaCard = item.isMatcha === true;
+            const isOut = item.isAvailable === false;
 
             return (
               <article
                 key={item.id}
                 className={`bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl border-2 ${
-                  isMatchaCard
+                  isOut
+                    ? "border-bocatta-sand/60 opacity-65"
+                    : isMatchaCard
                     ? "border-bocatta-matcha/50 hover:border-bocatta-matcha"
                     : "border-bocatta-sand/90 hover:border-bocatta-red"
                 } transition flex flex-col justify-between group`}
@@ -228,16 +231,22 @@ export function MenuSection() {
                     >
                       {item.categoryLabel}
                     </span>
-                    {item.badge && (
-                      <span
-                        className={`shrink-0 ${
-                          isMatchaCard
-                            ? "bg-bocatta-matcha text-white"
-                            : "bg-bocatta-wine text-bocatta-cream"
-                        } text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full`}
-                      >
-                        {item.badge}
+                    {isOut ? (
+                      <span className="shrink-0 bg-stone-500 text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                        Agotado
                       </span>
+                    ) : (
+                      item.badge && (
+                        <span
+                          className={`shrink-0 ${
+                            isMatchaCard
+                              ? "bg-bocatta-matcha text-white"
+                              : "bg-bocatta-wine text-bocatta-cream"
+                          } text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full`}
+                        >
+                          {item.badge}
+                        </span>
+                      )
                     )}
                   </div>
 
@@ -266,7 +275,9 @@ export function MenuSection() {
 
                 <div className="pt-3 border-t border-bocatta-sand/70 flex items-center justify-between gap-2">
                   <span className="text-[11px] font-medium text-bocatta-wine/60 truncate">
-                    {item.variants.length > 1
+                    {isOut
+                      ? "No disponible por ahora"
+                      : item.variants.length > 1
                       ? `${item.variants.length} opciones a elegir`
                       : item.secondaryOptions
                       ? "Elige salsa / proteína"
@@ -276,7 +287,11 @@ export function MenuSection() {
                   </span>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {hasMultipleChoices ? (
+                    {isOut ? (
+                      <span className="text-xs font-bold text-stone-500 px-3 py-1.5 bg-stone-100 rounded-xl">
+                        Agotado
+                      </span>
+                    ) : hasMultipleChoices ? (
                       <button
                         type="button"
                         onClick={() => setActiveItem(item)}
@@ -334,7 +349,6 @@ export function MenuSection() {
         </div>
       )}
 
-      {/* Leyenda legal para bebidas alcohólicas */}
       {showsAlcohol && (
         <p className="mt-6 text-center text-[11px] font-semibold uppercase tracking-wider text-bocatta-wine/70">
           <i className="fa-solid fa-circle-exclamation text-bocatta-red mr-1" aria-hidden="true"></i>

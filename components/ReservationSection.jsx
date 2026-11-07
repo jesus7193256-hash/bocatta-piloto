@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BOCATTA_WHATSAPP } from "@/lib/menu";
+import { createReservationInDb } from "@/lib/supabase";
 import { copyToClipboard, getChilapaNow, isValidPhone, whatsappUrl } from "@/lib/utils";
 import { buildReservationText } from "@/lib/whatsapp";
 import { useApp } from "./AppProvider";
@@ -20,6 +21,7 @@ function computeDefaultDate() {
 export function ReservationSection() {
   const { showToast } = useApp();
   const [minDate, setMinDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [res, setRes] = useState({
     name: "",
     phone: "",
@@ -47,7 +49,7 @@ export function ReservationSection() {
 
   const update = (field, value) => setRes((r) => ({ ...r, [field]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isMonday) {
       showToast("Recuerda que los lunes Bōcatta permanece cerrado. Elige de Martes a Domingo.", true);
@@ -57,7 +59,22 @@ export function ReservationSection() {
       showToast("Escribe un teléfono válido de 10 dígitos para confirmar tu reservación", true);
       return;
     }
-    window.open(whatsappUrl(BOCATTA_WHATSAPP, previewText), "_blank", "noopener,noreferrer");
+
+    setSubmitting(true);
+    let finalMsg = previewText;
+    try {
+      const saved = await createReservationInDb(res);
+      if (saved?.folio) {
+        finalMsg = `*Folio de Reservación: #R-${saved.folio}*\n` + previewText;
+        showToast(`¡Reservación #R-${saved.folio} registrada en el sistema!`);
+      }
+    } catch (err) {
+      /* si falla la red, igual abre WhatsApp */
+    } finally {
+      setSubmitting(false);
+    }
+
+    window.open(whatsappUrl(BOCATTA_WHATSAPP, finalMsg), "_blank", "noopener,noreferrer");
   };
 
   const handleCopy = async () => {
@@ -69,7 +86,6 @@ export function ReservationSection() {
     <section id="reservas-section" className="bg-bocatta-wine text-bocatta-cream py-12 border-t-4 border-bocatta-red">
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Columna informativa */}
           <div className="lg:col-span-5 space-y-5">
             <span className="inline-block bg-bocatta-red text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
               Reservaciones Sin Espera
@@ -120,12 +136,13 @@ export function ReservationSection() {
             </div>
           </div>
 
-          {/* Formulario */}
           <div className="lg:col-span-7 bg-bocatta-creamLight text-bocatta-wine rounded-3xl p-6 sm:p-8 shadow-2xl border-2 border-bocatta-sand">
             <div className="flex items-center justify-between border-b border-bocatta-sand pb-4 mb-5">
               <div>
                 <h3 className="font-serif text-2xl font-bold text-bocatta-wine">Solicitud de Reservación</h3>
-                <p className="text-xs text-bocatta-wine/70">Confirmación inmediata vía WhatsApp directo a Bōcatta</p>
+                <p className="text-xs text-bocatta-wine/70">
+                  Se registra automáticamente en el Panel Admin y se confirma por WhatsApp
+                </p>
               </div>
               <i className="fa-brands fa-whatsapp text-3xl text-emerald-600" aria-hidden="true"></i>
             </div>
@@ -274,10 +291,11 @@ export function ReservationSection() {
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <button
                   type="submit"
-                  className="flex-1 bg-bocatta-red hover:bg-bocatta-redDark text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  disabled={submitting}
+                  className="flex-1 bg-bocatta-red hover:bg-bocatta-redDark disabled:opacity-60 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
                   <i className="fa-brands fa-whatsapp text-lg" aria-hidden="true"></i>
-                  Confirmar Reservación por WhatsApp
+                  {submitting ? "Registrando reservación..." : "Confirmar Reservación por WhatsApp"}
                 </button>
                 <button
                   type="button"

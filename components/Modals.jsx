@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ALL_ROLLS_FOR_PLATTER, BOCATTA_WHATSAPP, COFFEE_EXTRAS } from "@/lib/menu";
+import { createOrderInDb, fetchOrdersByPhone } from "@/lib/supabase";
 import { copyToClipboard, isValidPhone, whatsappUrl } from "@/lib/utils";
 import { buildOrderText, cartTotal, MODALITIES } from "@/lib/whatsapp";
 import { DELIVERY_NOTE, useApp } from "./AppProvider";
@@ -87,7 +88,6 @@ export function ItemModal() {
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div className="bg-bocatta-cream w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-sand overflow-hidden max-h-[90vh] flex flex-col animate-fadeIn">
-        {/* Encabezado */}
         <div className="bg-bocatta-wine text-bocatta-cream p-5 flex items-start justify-between gap-4">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-bocatta-red bg-bocatta-cream px-2.5 py-0.5 rounded-full">
@@ -110,7 +110,6 @@ export function ItemModal() {
           </button>
         </div>
 
-        {/* Opciones */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-bocatta-wine">
@@ -222,7 +221,6 @@ export function ItemModal() {
           </div>
         </div>
 
-        {/* Pie */}
         <div className="p-4 bg-white border-t border-bocatta-sand flex items-center justify-between gap-4">
           <div className="flex items-center border-2 border-bocatta-sand rounded-xl bg-bocatta-cream">
             <button
@@ -386,15 +384,23 @@ export function CartDrawer() {
     cartOpen,
     setCartOpen,
     changeQty,
+    clearCart,
     modality,
     setModality,
     form,
     updateForm,
     store,
+    storeSettings,
+    recordMyOrder,
     showToast,
   } = useApp();
 
-  const totalCost = useMemo(() => cartTotal(cart), [cart]);
+  const [submitting, setSubmitting] = useState(false);
+  const deliveryFee =
+    modality === MODALITIES.delivery ? Number(storeSettings?.delivery_fee) || 0 : 0;
+  const subtotal = useMemo(() => cartTotal(cart), [cart]);
+  const totalCost = subtotal + deliveryFee;
+
   const previewText = useMemo(
     () => buildOrderText({ cart, modality, form, storeIsOpen: store.isOpen }),
     [cart, modality, form, store.isOpen]
@@ -402,7 +408,7 @@ export function CartDrawer() {
 
   if (!cartOpen) return null;
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!form.name.trim()) {
       document.getElementById("order-name")?.focus();
       showToast("Por favor escribe tu nombre para el pedido", true);
@@ -418,7 +424,36 @@ export function CartDrawer() {
       showToast("Por favor escribe tu dirección de entrega en Chilapa", true);
       return;
     }
-    window.open(whatsappUrl(BOCATTA_WHATSAPP, previewText), "_blank", "noopener,noreferrer");
+
+    setSubmitting(true);
+    let finalTicket = previewText;
+    try {
+      const savedOrder = await createOrderInDb({
+        customerName: form.name,
+        customerPhone: form.phone,
+        modality,
+        address: modality === MODALITIES.delivery ? form.address : null,
+        paymentMethod: form.payment,
+        cashAmount: form.payment === "Efectivo" ? form.cash : null,
+        notes: form.notes,
+        cart,
+        total: totalCost,
+      });
+
+      if (savedOrder) {
+        recordMyOrder(savedOrder);
+        finalTicket = `*COMANDA #${savedOrder.folio}*\n` + previewText;
+        showToast(`¡Pedido #${savedOrder.folio} registrado en cocina y listo para enviar!`);
+        clearCart();
+        setCartOpen(false);
+      }
+    } catch (err) {
+      showToast("Abriendo WhatsApp con tu pedido...");
+    } finally {
+      setSubmitting(false);
+    }
+
+    window.open(whatsappUrl(BOCATTA_WHATSAPP, finalTicket), "_blank", "noopener,noreferrer");
   };
 
   const handleCopy = async () => {
@@ -426,12 +461,13 @@ export function CartDrawer() {
     showToast("Ticket de pedido copiado al portapapeles");
   };
 
+  const deliveryNoteText = storeSettings?.delivery_note || DELIVERY_NOTE;
+
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" className="fixed inset-0 z-50">
       <div onClick={() => setCartOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
       <div className="absolute inset-y-0 right-0 w-full max-w-md bg-bocatta-cream shadow-2xl border-l-2 border-bocatta-sand flex flex-col">
-        {/* Encabezado */}
         <div className="bg-bocatta-wine text-bocatta-cream p-5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <i className="fa-solid fa-bag-shopping text-bocatta-red text-xl" aria-hidden="true"></i>
@@ -440,7 +476,7 @@ export function CartDrawer() {
                 Tu Pedido en Bōcatta
               </h3>
               <p className="text-[11px] text-bocatta-sand mt-1">
-                Generador de comanda rápida para WhatsApp
+                Se registra en cocina y genera tu comanda de WhatsApp
               </p>
             </div>
           </div>
@@ -454,7 +490,6 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {/* Cuerpo */}
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {cart.length === 0 ? (
             <div className="text-center py-10 space-y-3">
@@ -594,7 +629,7 @@ export function CartDrawer() {
                       ></textarea>
                       <p className="text-[11px] text-bocatta-wine/70 mt-1.5 flex items-start gap-1.5">
                         <i className="fa-solid fa-motorcycle text-bocatta-red mt-0.5" aria-hidden="true"></i>
-                        <span>{DELIVERY_NOTE}</span>
+                        <span>{deliveryNoteText}</span>
                       </p>
                     </div>
                   )}
@@ -646,7 +681,6 @@ export function CartDrawer() {
                   </div>
                 </div>
 
-                {/* Vista previa del ticket */}
                 <div className="bg-white p-3.5 rounded-2xl border border-bocatta-sand space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-bocatta-red">
@@ -669,7 +703,6 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Pie del carrito */}
         {cart.length > 0 && (
           <div className="p-4 bg-white border-t border-bocatta-sand space-y-3">
             <div className="flex items-center justify-between">
@@ -681,14 +714,164 @@ export function CartDrawer() {
 
             <button
               type="button"
+              disabled={submitting}
               onClick={handleSend}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-3.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer"
             >
               <i className="fa-brands fa-whatsapp text-lg" aria-hidden="true"></i>
-              Enviar Pedido a Bōcatta (756 115 9334)
+              {submitting ? "Registrando comanda..." : "Enviar Pedido a Bōcatta (756 115 9334)"}
             </button>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+const STATUS_BADGE = {
+  recibido: { label: "Recibido en cocina", cls: "bg-amber-100 text-amber-800 border-amber-300" },
+  preparando: { label: "En preparación 🔥", cls: "bg-blue-100 text-blue-800 border-blue-300" },
+  listo: { label: "¡Listo para entrega!", cls: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+  entregado: { label: "Entregado", cls: "bg-stone-200 text-stone-700 border-stone-300" },
+  cancelado: { label: "Cancelado", cls: "bg-red-100 text-red-800 border-red-300" },
+};
+
+export function MyOrdersModal() {
+  const { myOrdersOpen, setMyOrdersOpen, form } = useApp();
+  const [phoneQuery, setPhoneQuery] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const searchOrders = async (tel) => {
+    const target = (tel ?? phoneQuery).trim();
+    if (!target) return;
+    setLoading(true);
+    try {
+      const rows = await fetchOrdersByPhone(target);
+      setOrders(Array.isArray(rows) ? rows : []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!myOrdersOpen) return;
+    const defaultTel = form.phone || "756";
+    setPhoneQuery(defaultTel);
+    searchOrders(defaultTel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myOrdersOpen]);
+
+  if (!myOrdersOpen) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="my-orders-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) setMyOrdersOpen(false);
+      }}
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    >
+      <div className="bg-bocatta-cream w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl border-2 border-bocatta-sand overflow-hidden max-h-[88vh] flex flex-col animate-fadeIn">
+        <div className="bg-bocatta-wine text-bocatta-cream p-5 flex items-start justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-bocatta-red text-white px-2.5 py-0.5 rounded-full">
+              SEGUIMIENTO EN TIEMPO REAL
+            </span>
+            <h3 id="my-orders-title" className="font-serif text-2xl font-bold mt-1">
+              Estado de Mis Pedidos
+            </h3>
+            <p className="text-xs text-bocatta-sand/90 mt-0.5">
+              Ingresa tu número de teléfono para consultar el avance de tu comanda en cocina.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMyOrdersOpen(false)}
+            aria-label="Cerrar ventana"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
+          >
+            <i className="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div className="p-5 overflow-y-auto space-y-4 flex-1">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              searchOrders();
+            }}
+            className="flex gap-2"
+          >
+            <input
+              type="tel"
+              value={phoneQuery}
+              onChange={(e) => setPhoneQuery(e.target.value)}
+              placeholder="Tu teléfono (ej. 756 104 8821)"
+              className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-bocatta-sand text-xs text-bocatta-wine focus:outline-none focus:border-bocatta-red"
+            />
+            <button
+              type="submit"
+              className="bg-bocatta-red hover:bg-bocatta-redDark text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer"
+            >
+              {loading ? "Buscando..." : "Consultar"}
+            </button>
+          </form>
+
+          {orders.length === 0 ? (
+            <div className="text-center py-8 bg-white rounded-2xl border border-bocatta-sand p-4">
+              <p className="text-xs text-bocatta-wine/70">
+                No encontramos pedidos con ese teléfono. Prueba buscar <strong>756</strong> para ver las comandas de demostración.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((o) => {
+                const badge = STATUS_BADGE[o.status] || STATUS_BADGE.recibido;
+                return (
+                  <div
+                    key={o.id}
+                    className="bg-white p-4 rounded-2xl border border-bocatta-sand space-y-2 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <span className="font-serif font-extrabold text-sm text-bocatta-wine">
+                          Comanda #{o.folio}
+                        </span>
+                        <span className="text-xs text-bocatta-wine/70 ml-2">· {o.customer_name}</span>
+                      </div>
+                      <span
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badge.cls}`}
+                      >
+                        {badge.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-bocatta-wine/70">
+                      {o.modality} · Pago: {o.payment_method}
+                    </p>
+                    <ul className="text-xs text-bocatta-wine space-y-1 pt-1 border-t border-bocatta-sand/60">
+                      {(o.items || []).map((it, idx) => (
+                        <li key={idx} className="flex justify-between">
+                          <span>
+                            <strong>{it.quantity}x</strong> {it.name}
+                            {it.details ? ` (${it.details})` : ""}
+                          </span>
+                          <span className="font-semibold">${it.unitPrice * it.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex items-center justify-between pt-2 border-t border-bocatta-sand/60 text-xs font-bold">
+                      <span>Total del pedido:</span>
+                      <span className="font-serif text-base text-bocatta-red">${o.total} MXN</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
